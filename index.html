@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jobbvio</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jobbvio">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #F59E0B;          
+            --primary-hover: #D97706;    
+            --primary-light: #FEF3C7;    
+            --secondary: #0F172A;        
+            --secondary-hover: #1E293B;  
+            --accent-green: #F59E0B;     
+            --accent-green-light: #D1FAE5;
+            --accent-red: #EF4444;
+            --accent-red-light: #FEE2E2;
+            --bg-body: #0F172A;          
+            --bg-app: #F8FAFC;           
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            --border: #E2E8F0;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-body);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { display: flex; justify-content: center; align-items: center; }
+
+        .app-shell {
+            width: 100vw;
+            height: 100dvh;
+            background-color: var(--bg-app);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 880px) {
+            .app-shell {
+                width: 430px;
+                height: 92vh;
+                max-height: 932px;
+                border-radius: 40px;
+                border: 8px solid #1E293B;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* TOAST NOTIFICATION CONTAINER */
+        #toast-container {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            width: 90%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--secondary);
+            color: #FFFFFF;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.3s ease 2.7s forwards;
+            pointer-events: auto;
+            border-left: 4px solid var(--primary);
+        }
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast i { font-size: 1.1rem; }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            background-color: var(--bg-app);
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        .screen.active { display: flex; z-index: 2; }
+
+        .auth-header { padding: 24px 20px 12px 20px; text-align: center; }
+        .auth-logo { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .auth-logo img { height: 72px; object-fit: contain; border-radius: 50%; }
+        .auth-subtitle { color: var(--text-muted); font-size: 0.88rem; margin-top: 6px; font-weight: 500; }
+
+        .auth-body { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .section-title { font-size: 0.85rem; font-weight: 700; color: var(--secondary); margin-bottom: 6px; }
+
+        .role-selector { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+        .role-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+        .role-card.selected { border-color: var(--primary); background-color: var(--primary-light); }
+        .role-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--bg-app); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .role-card.selected .role-icon { background: var(--primary); color: #FFFFFF; }
+        .role-info h3 { font-size: 1rem; font-weight: 700; color: var(--secondary); }
+        .role-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--secondary); margin-bottom: 6px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper i { position: absolute; left: 14px; color: var(--text-light); font-size: 1rem; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 14px 12px 42px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text-main); background: var(--card-bg); outline: none; box-sizing: border-box; }
+        .form-file-input { padding: 10px 14px 10px 42px; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; width: 100%; cursor: pointer; box-sizing: border-box; }
+        .form-textarea { padding-left: 14px; height: 80px; resize: none; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); }
+
+        .tag-select-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .tag-chip { padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-muted); cursor: pointer; user-select: none; }
+        .tag-chip.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-hover); }
+
+        .btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-sm); text-decoration: none; box-sizing: border-box; }
+        .btn-primary { background-color: var(--primary); color: var(--secondary); }
+        .btn-secondary { background-color: var(--secondary); color: #FFFFFF; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--secondary); }
+        .btn-danger { background-color: var(--accent-red); color: #FFFFFF; }
+
+        .auth-switch-link { text-align: center; margin-top: 14px; font-size: 0.85rem; color: var(--text-muted); }
+        .auth-switch-link a { color: var(--primary-hover); font-weight: 700; text-decoration: none; }
+
+        .app-header { padding: 10px 16px; background: var(--card-bg); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .app-logo img { height: 52px; object-fit: contain; border-radius: 50%; border: solid #F59E0B 1px; }
+        .user-badge { display: flex; align-items: center; gap: 6px; background: var(--bg-app); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: var(--secondary); border: 1px solid var(--border); }
+
+        .app-main { flex: 1; padding: 14px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+
+        .bottom-nav { background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 16px 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; gap: 4px; width: 33%; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--primary-hover); }
+
+        .card-container { flex: 1; display: flex; flex-direction: column; }
+
+        .profile-card, .feed-card-item {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: 14px;
+            text-align: left;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-header-title { font-size: 1.3rem; font-weight: 800; color: var(--secondary); margin: 0; }
+        .role-badge-pill { display: inline-block; background: var(--primary-light); color: var(--primary-hover); font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; margin-top: 6px; }
+        .location-tag { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+        .bio-text { font-size: 0.88rem; color: var(--text-main); margin-top: 6px; line-height: 1.4; white-space: pre-line; }
+
+        .view-tags-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .tag-display { background: var(--bg-app); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--secondary); }
+
+        .swipe-stack {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .swipe-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 380px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .swipe-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.15s ease;
+        }
+        .action-btn:active { transform: scale(0.9); }
+        .btn-pass { background: var(--accent-red-light); color: var(--accent-red); }
+        .btn-like { background: var(--accent-green-light); color: var(--accent-green); }
+
+        .like-icon-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--bg-app);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+        .like-icon-btn.liked {
+            color: var(--accent-red);
+            background: var(--accent-red-light);
+            border-color: var(--accent-red);
+        }
+
+        .empty-feed {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .empty-feed i {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        /* MODAL STYLES */
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-backdrop.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-md);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--bg-app);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* CONFIRM MODAL */
+        .confirm-box {
+            text-align: center;
+        }
+        .confirm-box i {
+            font-size: 2.5rem;
+            color: var(--accent-red);
+            margin-bottom: 12px;
+        }
+        .confirm-box h3 {
+            margin: 0 0 8px 0;
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        .confirm-box p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div id="toast-container"></div>
+
+    <div id="screen-welcome" class="screen active">
+        <div class="auth-header">
+            <div class="auth-logo"><img src="logo.png" alt="Jobbvio Logo"></div>
+            <p class="auth-subtitle">Rekrytering för restaurangbranschen</p>
+        </div>
+        <div class="auth-body">
+            <div>
+                <p class="section-title">VÄLJ DITT KONTO</p>
+                <div class="role-selector">
+                    <div class="role-card selected" id="role-candidate-btn" onclick="selectAuthRole('candidate')">
+                        <div class="role-icon"><i class="fa-solid fa-user-gear"></i></div>
+                        <div class="role-info">
+                            <h3>Jag söker jobb</h3>
+                            <p>Hitta jobberbjudanden och visa intresse direkt.</p>
+                        </div>
+                    </div>
+                    <div class="role-card" id="role-restaurant-btn" onclick="selectAuthRole('restaurant')">
+                        <div class="role-icon"><i class="fa-solid fa-store"></i></div>
+                        <div class="role-info">
+                            <h3>Jag söker personal</h3>
+                            <p>Hitta personal och spara kandidater.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="goToScreen('screen-register')">Fortsätt <i class="fa-solid fa-arrow-right"></i></button>
+                <div class="auth-switch-link">Har du redan ett konto? <a href="#" onclick="goToScreen('screen-login')">Logga in</a></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-register" class="screen">
+        <div class="auth-header">
+            <div class="auth-logo"><img src="logo.png" alt="Jobbvio Logo"></div>
+            <p class="auth-subtitle">Skapa konto</p>
+        </div>
+        <div class="auth-body">
+            <form onsubmit="handleFirebaseRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">E-postadress</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" class="form-input" id="reg-email" placeholder="din.epost@doman.se" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lösenord</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" class="form-input" id="reg-password" placeholder="Minst 6 tecken" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Skapa konto & Fortsätt <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+            <div class="auth-switch-link"><a href="#" onclick="goToScreen('screen-welcome')"><i class="fa-solid fa-chevron-left"></i> Tillbaka</a></div>
+        </div>
+    </div>
+
+    <div id="screen-login" class="screen">
+        <div class="auth-header">
+            <div class="auth-logo"><img src="logo.png" alt="Jobbvio Logo"></div>
+            <p class="auth-subtitle">Välkommen tillbaka</p>
+        </div>
+        <div class="auth-body">
+            <form onsubmit="handleFirebaseLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">E-postadress</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" class="form-input" id="login-email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lösenord</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" class="form-input" id="login-password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="margin-top: 16px;">Logga in <i class="fa-solid fa-right-to-bracket"></i></button>
+            </form>
+            <div class="auth-switch-link">Har du inget konto? <a href="#" onclick="goToScreen('screen-welcome')">Skapa konto</a></div>
+        </div>
+    </div>
+
+    <div id="screen-profile-editor" class="screen">
+        <div class="auth-header">
+            <div class="auth-logo"><img src="logo.png" alt="Jobbvio Logo"></div>
+            <p class="auth-subtitle" id="editor-subtitle">Uppdatera dina uppgifter</p>
+        </div>
+        <div class="auth-body">
+            <form onsubmit="saveProfileToFirebase(event)">
+                
+                <div class="form-group">
+                    <label class="form-label" id="lbl-name">Namn</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-user" id="icn-name"></i>
+                        <input type="text" id="prof-name" class="form-input" placeholder="T.ex. Anna Svensson" required>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-contact" style="display: none;">
+                    <label class="form-label">Kontaktperson</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <input type="text" id="prof-contact-person" class="form-input" placeholder="T.ex. Johan Lind (Köksmästare)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" id="lbl-location">Stad / Plats</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input type="text" id="prof-location" class="form-input" placeholder="T.ex. Helsingborg" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Telefonnummer</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="prof-phone" class="form-input" placeholder="070-123 45 67" required>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-experience" style="display: none;">
+                    <label class="form-label">Erfarenhet inom branschen</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-briefcase"></i>
+                        <select id="prof-experience" class="form-select">
+                            <option value="Ny i branschen">Ny i branschen (0-1 år)</option>
+                            <option value="1-3 år">1–3 års erfarenhet</option>
+                            <option value="3-5 år">3–5 års erfarenhet</option>
+                            <option value="5+ år">5+ års erfarenhet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-past-jobs" style="display: none;">
+                    <label class="form-label">Tidigare restauranger / arbetsplatser</label>
+                    <textarea class="form-textarea" id="prof-past-jobs" placeholder="T.ex.- Quebab (Kock, 2022-2024)- Sillen & Makrillen (Servitör, 2020)"></textarea>
+                </div>
+
+                <div class="form-group" id="group-cv" style="display: none;">
+                    <label class="form-label">Ladda upp CV (PDF-format)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <input type="file" id="prof-cv-file" class="form-file-input" accept="application/pdf">
+                    </div>
+                    <span id="cv-file-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; display:block;"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" id="lbl-bio">Presentation</label>
+                    <textarea class="form-textarea" id="prof-bio" placeholder="Berätta kort om..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" id="lbl-tags">Erfarenheter & Roller</label>
+                    <div class="tag-select-container" id="tagContainer">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-save-profile" class="btn btn-primary" style="margin-top: 16px;">Spara Profil <i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-outline" style="margin-top: 8px;" onclick="goToScreen('screen-app')">Avbryt</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="screen-app" class="screen">
+        <div class="app-header">
+            <div class="app-logo"><img src="logo.png" alt="Jobbvio Logo"></div>
+            <div class="user-badge" id="appUserBadge">
+                <i class="fa-solid fa-circle-user"></i> <span id="appRoleLabel">Användare</span>
+            </div>
+        </div>
+
+        <div class="app-main">
+            <div id="tab-feed" class="card-container">
+                <div id="feedContent">Laddar flöde...</div>
+            </div>
+
+            <div id="tab-saved" class="card-container" style="display: none;">
+                <h3 style="margin-top: 0; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-bookmark" style="color:var(--primary);"></i> Sparade Favoriter</h3>
+                <div id="savedListContent">Laddar sparade...</div>
+            </div>
+
+            <div id="tab-profile" class="card-container" style="display: none;">
+                <div class="profile-card">
+                    <h2 id="view-profile-name" class="profile-header-title">Laddar...</h2>
+                    <span id="view-profile-role" class="role-badge-pill"></span>
+                    
+                    <p id="view-profile-contact" class="location-tag" style="display: none;"><i class="fa-regular fa-address-card"></i> <span></span></p>
+                    <p id="view-profile-location" class="location-tag"><i class="fa-solid fa-location-dot"></i> <span></span></p>
+                    <p id="view-profile-phone" class="location-tag"><i class="fa-solid fa-phone"></i> <span></span></p>
+                    <p id="view-profile-exp" class="location-tag" style="display: none;"><i class="fa-solid fa-briefcase"></i> <span></span></p>
+
+                    <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 14px; margin-bottom: 2px;">PRESENTATION</p>
+                    <p id="view-profile-bio" class="bio-text"></p>
+
+                    <div id="view-profile-past-jobs-section" style="display: none; margin-top: 14px;">
+                        <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 2px;">TIDIGARE RESTAURANGER & ERFARENHET</p>
+                        <p id="view-profile-past-jobs" class="bio-text"></p>
+                    </div>
+
+                    <div id="view-profile-cv-section" style="display: none; margin-top: 14px;">
+                        <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 4px;">CV</p>
+                        <div id="view-profile-cv-container"></div>
+                    </div>
+
+                    <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 14px; margin-bottom: 4px;">ROLLER & FOKUS</p>
+                    <div id="view-profile-tags" class="view-tags-group"></div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="openProfileEditor()"><i class="fa-solid fa-pen-to-square"></i> Redigera Profil</button>
+                <button class="btn btn-outline" style="margin-top: 10px; color: #EF4444;" onclick="handleFirebaseLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logga ut</button>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab(this, 'tab-feed')"><i class="fa-solid fa-compass"></i>Utforska</div>
+            <div class="nav-item" onclick="switchTab(this, 'tab-saved')"><i class="fa-solid fa-bookmark"></i>Sparade</div>
+            <div class="nav-item" onclick="switchTab(this, 'tab-profile')"><i class="fa-solid fa-user"></i>Min Profil</div>
+        </nav>
+    </div>
+
+    <div id="profileModal" class="modal-backdrop">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modalBody">Laddar detaljer...</div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-backdrop">
+        <div class="modal-content confirm-box">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Är du säker?</h3>
+            <p id="confirmModalText">Vill du ta bort personen från dina sparade favoriter?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-outline" onclick="closeConfirmModal()">Avbryt</button>
+                <button class="btn btn-danger" id="btnConfirmDelete">Ja, ta bort</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBewQCcVn-pkR1Gw9hAs7BocAmcFP1xy-o",
+        authDomain: "jobbvio-c8d6f.firebaseapp.com",
+        projectId: "jobbvio-c8d6f",
+        storageBucket: "jobbvio-c8d6f.firebasestorage.app",
+        messagingSenderId: "83919499971",
+        appId: "1:83919499971:web:c61b5fd47a3f13695d2876",
+        measurementId: "G-JF71K1267P"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let currentRole = 'candidate';
+    let currentUserData = null;
+    let selectedTags = [];
+    let allUsers = [];
+    let feedItems = [];
+    let currentSwipeIndex = 0;
+    let pendingDeleteId = null;
+
+    const CANDIDATE_TAGS = ['Kock', 'Servitris / Servitör', 'Bartender', 'Diskare', 'Hovmästare', 'Extra vid behov'];
+    const RESTAURANT_TAGS = ['Söker Kock', 'Söker Servering', 'Söker Disk', 'Söker Hovmästare', 'Söker "Extra vid behov"'];
+
+    // CUSTOM TOAST NOTIFICATION SYSTEM
+    window.showToast = (message, type = 'info') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'fa-info-circle';
+        if (type === 'success') icon = 'fa-circle-check';
+        if (type === 'error') icon = 'fa-circle-exclamation';
+
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 3000);
+    };
+
+    window.selectAuthRole = (role) => {
+        currentRole = role;
+        document.getElementById('role-candidate-btn').classList.toggle('selected', role === 'candidate');
+        document.getElementById('role-restaurant-btn').classList.toggle('selected', role === 'restaurant');
+    };
+
+    window.goToScreen = (screenId) => {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    currentUserData = { id: user.uid, ...docSnap.data() };
+                    renderProfileView();
+                    loadFeedData();
+                    goToScreen('screen-app');
+                } else {
+                    openProfileEditor();
+                }
+            } catch (e) {
+                console.error("Fel vid hämtning av profil:", e);
+            }
+        } else {
+            goToScreen('screen-welcome');
+        }
+    });
+
+    window.handleFirebaseRegister = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            const initialData = {
+                email: email,
+                role: currentRole,
+                favorites: [],
+                createdAt: new Date().toISOString()
+            };
+
+            await setDoc(doc(db, "users", user.uid), initialData);
+            currentUserData = { id: user.uid, ...initialData };
+            showToast("Konto skapat!", "success");
+            openProfileEditor();
+        } catch (error) {
+            showToast("Fel vid registrering: " + error.message, "error");
+        }
+    };
+
+    window.handleFirebaseLogin = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            showToast("Välkommen tillbaka!", "success");
+        } catch (error) {
+            showToast("Inloggning misslyckades. Kontrollera uppgifterna.", "error");
+        }
+    };
+
+    window.handleFirebaseLogout = () => {
+        signOut(auth);
+        showToast("Du har loggats ut.");
+    };
+
+    window.openProfileEditor = () => {
+        const role = currentUserData?.role || currentRole;
+
+        if (role === 'candidate') {
+            document.getElementById('editor-subtitle').innerText = 'Profil för jobbsökande';
+            document.getElementById('lbl-name').innerText = 'Ditt Namn';
+            document.getElementById('prof-name').placeholder = 'T.ex. Anna Svensson';
+            document.getElementById('icn-name').className = 'fa-regular fa-user';
+            document.getElementById('lbl-location').innerText = 'Stad / Ort';
+            document.getElementById('prof-location').placeholder = 'T.ex. Helsingborg';
+            document.getElementById('lbl-bio').innerText = 'Kort Presentation / Om dig';
+            document.getElementById('lbl-tags').innerText = 'Din/dina Roller';
+            document.getElementById('group-contact').style.display = 'none';
+            document.getElementById('group-experience').style.display = 'block';
+            document.getElementById('group-past-jobs').style.display = 'block';
+            document.getElementById('group-cv').style.display = 'block';
+        } else {
+            document.getElementById('editor-subtitle').innerText = 'Profil för restaurang';
+            document.getElementById('lbl-name').innerText = 'Restaurangens Namn';
+            document.getElementById('prof-name').placeholder = 'T.ex. Bistro Brasserie';
+            document.getElementById('icn-name').className = 'fa-solid fa-store';
+            document.getElementById('lbl-location').innerText = 'Adress';
+            document.getElementById('lbl-bio').innerText = 'Om Restaurangen';
+            document.getElementById('lbl-tags').innerText = 'Roller ni söker';
+            document.getElementById('group-contact').style.display = 'block';
+            document.getElementById('group-experience').style.display = 'none';
+            document.getElementById('group-past-jobs').style.display = 'none';
+            document.getElementById('group-cv').style.display = 'none';
+        }
+
+        if (currentUserData) {
+            document.getElementById('prof-name').value = currentUserData.name || '';
+            document.getElementById('prof-location').value = currentUserData.location || '';
+            document.getElementById('prof-phone').value = currentUserData.phone || '';
+            document.getElementById('prof-bio').value = currentUserData.bio || '';
+            
+            if (role === 'candidate') {
+                document.getElementById('prof-experience').value = currentUserData.experience || 'Ny i branschen';
+                document.getElementById('prof-past-jobs').value = currentUserData.pastJobs || '';
+                
+                const cvStatus = document.getElementById('cv-file-status');
+                if (currentUserData.cvUrl) {
+                    cvStatus.innerText = "Ett CV finns redan uppladdat. Välj ny fil för att ersätta.";
+                    cvStatus.style.color = "var(--accent-green)";
+                } else {
+                    cvStatus.innerText = "Inget CV uppladdat ännu.";
+                }
+            } else {
+                document.getElementById('prof-contact-person').value = currentUserData.contactPerson || '';
+            }
+            selectedTags = currentUserData.tags || [];
+        } else {
+            selectedTags = [];
+        }
+
+        renderTagSelector(role);
+        goToScreen('screen-profile-editor');
+    };
+
+    function renderTagSelector(role) {
+        const container = document.getElementById('tagContainer');
+        container.innerHTML = '';
+        const tagsList = role === 'candidate' ? CANDIDATE_TAGS : RESTAURANT_TAGS;
+
+        tagsList.forEach(tag => {
+            const chip = document.createElement('div');
+            chip.className = `tag-chip ${selectedTags.includes(tag) ? 'active' : ''}`;
+            chip.innerText = tag;
+            chip.onclick = () => {
+                if (selectedTags.includes(tag)) {
+                    selectedTags = selectedTags.filter(t => t !== tag);
+                } else {
+                    selectedTags.push(tag);
+                }
+                chip.classList.toggle('active');
+            };
+            container.appendChild(chip);
+        });
+    }
+
+    window.saveProfileToFirebase = async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const saveBtn = document.getElementById('btn-save-profile');
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Sparar...";
+
+        const role = currentUserData?.role || currentRole;
+
+        const profileData = {
+            name: document.getElementById('prof-name').value,
+            location: document.getElementById('prof-location').value,
+            phone: document.getElementById('prof-phone').value,
+            bio: document.getElementById('prof-bio').value,
+            role: role,
+            tags: selectedTags,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (role === 'candidate') {
+            profileData.experience = document.getElementById('prof-experience').value;
+            profileData.pastJobs = document.getElementById('prof-past-jobs').value;
+
+            const cvFileInput = document.getElementById('prof-cv-file');
+            if (cvFileInput.files.length > 0) {
+                const cvFile = cvFileInput.files[0];
+                if (cvFile.type === "application/pdf") {
+                    try {
+                        const cvRef = ref(storage, `cvs/${user.uid}_${cvFile.name}`);
+                        await uploadBytes(cvRef, cvFile);
+                        const downloadUrl = await getDownloadURL(cvRef);
+                        profileData.cvUrl = downloadUrl;
+                        profileData.cvFileName = cvFile.name;
+                    } catch (uploadError) {
+                        console.error("Fel vid CV-uppladdning:", uploadError);
+                        showToast("CV kunde inte laddas upp.", "error");
+                    }
+                } else {
+                    showToast("Enbart PDF-filer tillåts för CV.", "error");
+                }
+            }
+        } else {
+            profileData.contactPerson = document.getElementById('prof-contact-person').value;
+        }
+
+        try {
+            await setDoc(doc(db, "users", user.uid), profileData, { merge: true });
+            currentUserData = { ...currentUserData, ...profileData };
+            renderProfileView();
+            loadFeedData();
+            showToast("Profilen har sparats!", "success");
+            goToScreen('screen-app');
+        } catch (error) {
+            showToast("Kunde inte spara profil: " + error.message, "error");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Spara Profil <i class="fa-solid fa-check"></i>';
+        }
+    };
+
+    function renderProfileView() {
+        if (!currentUserData) return;
+
+        const isCandidate = currentUserData.role === 'candidate';
+
+        document.getElementById('view-profile-name').innerText = currentUserData.name || 'Inget namn angivet';
+        document.getElementById('view-profile-role').innerText = isCandidate ? 'Jobbsökande' : 'Restaurang';
+        
+        const locSpan = document.getElementById('view-profile-location').querySelector('span');
+        locSpan.innerText = currentUserData.location || 'Ej angivet';
+
+        const phoneSpan = document.getElementById('view-profile-phone').querySelector('span');
+        phoneSpan.innerText = currentUserData.phone || 'Ej angivet';
+
+        document.getElementById('view-profile-bio').innerText = currentUserData.bio || 'Ingen presentation angiven ännu.';
+        document.getElementById('appRoleLabel').innerText = isCandidate ? 'Jobbsökande' : 'Restaurang';
+
+        const contactEl = document.getElementById('view-profile-contact');
+        const expEl = document.getElementById('view-profile-exp');
+        const pastJobsSec = document.getElementById('view-profile-past-jobs-section');
+        const cvSec = document.getElementById('view-profile-cv-section');
+        const cvContainer = document.getElementById('view-profile-cv-container');
+
+        if (isCandidate) {
+            contactEl.style.display = 'none';
+            expEl.style.display = 'flex';
+            expEl.querySelector('span').innerText = currentUserData.experience || 'Ny i branschen';
+
+            if (currentUserData.pastJobs) {
+                pastJobsSec.style.display = 'block';
+                document.getElementById('view-profile-past-jobs').innerText = currentUserData.pastJobs;
+            } else {
+                pastJobsSec.style.display = 'none';
+            }
+
+            cvSec.style.display = 'block';
+            if (currentUserData.cvUrl) {
+                cvContainer.innerHTML = `
+                    <a href="${currentUserData.cvUrl}" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; padding: 10px; border-color: var(--primary); color: var(--primary-hover);">
+                        <i class="fa-solid fa-file-pdf" style="color: #EF4444; font-size: 1.1rem;"></i> Visa uppladdat CV (PDF)
+                    </a>`;
+            } else {
+                cvContainer.innerHTML = `<span style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-file-excel" style="color:var(--text-light);"></i> Inget CV uppladdat</span>`;
+            }
+        } else {
+            expEl.style.display = 'none';
+            pastJobsSec.style.display = 'none';
+            cvSec.style.display = 'none';
+
+            if (currentUserData.contactPerson) {
+                contactEl.style.display = 'flex';
+                contactEl.querySelector('span').innerText = `Kontakt: ${currentUserData.contactPerson}`;
+            } else {
+                contactEl.style.display = 'none';
+            }
+        }
+
+        const tagsContainer = document.getElementById('view-profile-tags');
+        tagsContainer.innerHTML = '';
+        if (currentUserData.tags && currentUserData.tags.length > 0) {
+            currentUserData.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'tag-display';
+                tagSpan.innerText = tag;
+                tagsContainer.appendChild(tagSpan);
+            });
+        } else {
+            tagsContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Inga roller angivna.</span>';
+        }
+    }
+
+    /* FLÖDES- OCH SPARADE PROFILER-LOGIK*/
+    async function loadFeedData() {
+        if (!currentUserData) return;
+
+        const targetRole = currentUserData.role === 'candidate' ? 'restaurant' : 'candidate';
+        const feedContainer = document.getElementById('feedContent');
+        feedContainer.innerHTML = '<p style="text-align:center; padding:20px;">Hämtar flöde...</p>';
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            allUsers = [];
+
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (docSnap.id !== auth.currentUser.uid && data.role === targetRole && data.name) {
+                    allUsers.push({ id: docSnap.id, ...data });
+                }
+            });
+
+            const favorites = currentUserData.favorites || [];
+            feedItems = allUsers.filter(user => !favorites.includes(user.id));
+
+            if (feedItems.length === 0) {
+                feedContainer.innerHTML = `
+                    <div class="empty-feed">
+                        <i class="fa-solid fa-users-slash"></i>
+                        <h3>Inga fler ${targetRole === 'restaurant' ? 'restauranger' : 'kandidater'} att visa</h3>
+                        <p>Du har gått igenom alla tillgängliga profiler eller sparat dem.</p>
+                    </div>`;
+                renderSavedList();
+                return;
+            }
+
+            if (currentUserData.role === 'candidate') {
+                renderCandidateFeed();
+            } else {
+                currentSwipeIndex = 0;
+                renderRestaurantSwipeFeed();
+            }
+
+            renderSavedList();
+        } catch (err) {
+            console.error("Fel vid laddning av flöde:", err);
+            feedContainer.innerHTML = '<p style="color:var(--accent-red); text-align:center;">Kunde inte ladda flödet.</p>';
+        }
+    }
+
+    function renderCandidateFeed() {
+        const container = document.getElementById('feedContent');
+        container.innerHTML = '';
+
+        if (feedItems.length === 0) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>
+                    <h3>Inga fler restauranger i flödet!</h3>
+                    <p>Du har sparat alla intressanta restauranger.</p>
+                </div>`;
+            return;
+        }
+
+        feedItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'feed-card-item';
+
+            card.innerHTML = `
+                <button class="like-icon-btn" title="Spara till favoriter" onclick="toggleFavorite('${item.id}')">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+                <h3 class="profile-header-title">${item.name}</h3>
+                <span class="role-badge-pill"><i class="fa-solid fa-store"></i> Restaurang</span>
+                <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
+                <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
+                ${item.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontakt: ${item.contactPerson}</p>` : ''}
+                
+                <p style="font-size:0.8rem; font-weight:700; color:var(--secondary); margin-top:10px; margin-bottom:2px;">OM RESTAURANGEN</p>
+                <p class="bio-text">${item.bio || 'Ingen beskrivning'}</p>
+                
+                <p style="font-size:0.8rem; font-weight:700; color:var(--secondary); margin-top:10px; margin-bottom:4px;">SÖKER ROLLER</p>
+                <div class="view-tags-group">
+                    ${(item.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.75rem; color:var(--text-muted);">Inga</span>'}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function renderRestaurantSwipeFeed() {
+        const container = document.getElementById('feedContent');
+        
+        if (currentSwipeIndex >= feedItems.length) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>
+                    <h3>Alla kandidater genomgångna!</h3>
+                    <p>Visa sparade kandidater under fliken <b>Sparade</b>.</p>
+                </div>`;
+            return;
+        }
+
+        const item = feedItems[currentSwipeIndex];
+
+        container.innerHTML = `
+            <div class="swipe-stack">
+                <div class="swipe-card" id="activeSwipeCard">
+                    <div>
+                        <h3 class="profile-header-title">${item.name}</h3>
+                        <span class="role-badge-pill"><i class="fa-solid fa-user"></i> Jobbsökande</span>
+
+                        <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
+                        <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
+                        <p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience || 'Ej angiven'}</p>
+
+                        <p style="font-size:0.8rem; font-weight:700; color:var(--secondary); margin-top:12px; margin-bottom:2px;">OM KANDIDATEN</p>
+                        <p class="bio-text">${item.bio || 'Ingen presentation'}</p>
+
+                        ${item.pastJobs ? `
+                            <p style="font-size:0.8rem; font-weight:700; color:var(--secondary); margin-top:10px; margin-bottom:2px;">TIDIGARE ERFARENHET</p>
+                            <p class="bio-text">${item.pastJobs}</p>
+                        ` : ''}
+
+                        <p style="font-size:0.8rem; font-weight:700; color:var(--secondary); margin-top:12px; margin-bottom:4px;">ROLLER</p>
+                        <div class="view-tags-group">
+                            ${(item.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.75rem; color:var(--text-muted);">Inga</span>'}
+                        </div>
+                    </div>
+
+                    <div class="swipe-actions">
+                        <button class="action-btn btn-pass" onclick="handleSwipe(false)" title="Kasta">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button class="action-btn btn-like" onclick="handleSwipe(true)" title="Spara till favoriter">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    window.handleSwipe = async (save) => {
+        const item = feedItems[currentSwipeIndex];
+        const card = document.getElementById('activeSwipeCard');
+
+        if (card) {
+            card.style.transform = save ? 'translateX(120px) rotate(15deg)' : 'translateX(-120px) rotate(-15deg)';
+            card.style.opacity = '0';
+        }
+
+        if (save) {
+            await toggleFavorite(item.id);
+        } else {
+            currentSwipeIndex++;
+            renderRestaurantSwipeFeed();
+        }
+    };
+
+    // VÄXLA FAVORITMARKERING OCH BEKRÄFTELSE VID BORTTAGNING
+    window.requestDeleteFavorite = (targetId, name = '') => {
+        pendingDeleteId = targetId;
+        const confirmText = name ? `Vill du ta bort "${name}" från dina sparade favoriter?` : `Vill du ta bort personen från dina sparade favoriter?`;
+        document.getElementById('confirmModalText').innerText = confirmText;
+        document.getElementById('confirmModal').classList.add('active');
+    };
+
+    window.closeConfirmModal = () => {
+        pendingDeleteId = null;
+        document.getElementById('confirmModal').classList.remove('active');
+    };
+
+    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+        if (pendingDeleteId) {
+            const idToRemove = pendingDeleteId;
+            closeConfirmModal();
+            closeProfileModal();
+            await removeFavorite(idToRemove);
+        }
+    });
+
+    async function removeFavorite(targetId) {
+        if (!auth.currentUser) return;
+        const userRef = doc(db, "users", auth.currentUser.uid);
+
+        try {
+            await updateDoc(userRef, { favorites: arrayRemove(targetId) });
+            currentUserData.favorites = (currentUserData.favorites || []).filter(id => id !== targetId);
+            showToast("Borttagen från sparade.", "info");
+            loadFeedData();
+        } catch (e) {
+            console.error("Fel vid borttagning av favorit:", e);
+            showToast("Kunde inte ta bort favorit.", "error");
+        }
+    }
+
+    window.toggleFavorite = async (targetId) => {
+        if (!auth.currentUser) return;
+
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        let favorites = currentUserData.favorites || [];
+        const isFavorite = favorites.includes(targetId);
+
+        try {
+            if (isFavorite) {
+                await updateDoc(userRef, { favorites: arrayRemove(targetId) });
+                currentUserData.favorites = favorites.filter(id => id !== targetId);
+                showToast("Borttagen från dina favoriter!", "info");
+            } else {
+                await updateDoc(userRef, { favorites: arrayUnion(targetId) });
+                favorites.push(targetId);
+                currentUserData.favorites = favorites;
+                showToast("Sparad i dina favoriter!", "success");
+            }
+            loadFeedData();
+        } catch (e) {
+            console.error("Kunde inte uppdatera favoriter:", e);
+            showToast("Ett fel uppstod.", "error");
+        }
+    };
+
+    // RENDER SPARADE PROFILER
+    function renderSavedList() {
+        const container = document.getElementById('savedListContent');
+        const favorites = currentUserData?.favorites || [];
+
+        if (favorites.length === 0) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <p>Du har inga sparade profiler än.</p>
+                </div>`;
+            return;
+        }
+
+        const savedItems = allUsers.filter(item => favorites.includes(item.id));
+        container.innerHTML = '';
+
+        savedItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'profile-card';
+            card.style.cursor = 'pointer';
+
+            card.innerHTML = `
+                <button class="like-icon-btn liked" title="Ta bort från sparade" onclick="event.stopPropagation(); requestDeleteFavorite('${item.id}', '${item.name}');">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <div onclick="openProfileModal('${item.id}')">
+                    <h3 class="profile-header-title">${item.name}</h3>
+                    <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej plats'}</p>
+                    <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
+                    ${item.experience ? `<p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience}</p>` : ''}
+                    ${item.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontakt: ${item.contactPerson}</p>` : ''}
+                    
+                    <div style="margin-top:10px; font-size:0.8rem; font-weight:700; color:var(--primary-hover); display:flex; align-items:center; gap:6px;">
+                        Visa hel profil <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // VISA APPARATEN FÖR HEL PROFIL (MODAL)
+    window.openProfileModal = (userId) => {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
+
+        const modalBody = document.getElementById('modalBody');
+        const isCandidate = user.role === 'candidate';
+
+        modalBody.innerHTML = `
+            <h2 class="profile-header-title" style="margin-bottom:4px;">${user.name}</h2>
+            <span class="role-badge-pill">${isCandidate ? 'Jobbsökande' : 'Restaurang'}</span>
+            
+            <p class="location-tag" style="margin-top:12px;"><i class="fa-solid fa-location-dot"></i> Plats/Adress: ${user.location || 'Ej angiven'}</p>
+            <p class="location-tag"><i class="fa-solid fa-phone"></i> Tel: <a href="tel:${user.phone}" style="color:var(--primary-hover); font-weight:700; text-decoration:none;">${user.phone || 'Ej angivet'}</a></p>
+            ${user.email ? `<p class="location-tag"><i class="fa-regular fa-envelope"></i> E-post: <a href="mailto:${user.email}" style="color:var(--primary-hover); text-decoration:none;">${user.email}</a></p>` : ''}
+            ${user.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontaktperson: ${user.contactPerson}</p>` : ''}
+            ${user.experience ? `<p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${user.experience}</p>` : ''}
+
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 16px; margin-bottom: 4px;">PRESENTATION</p>
+            <p class="bio-text">${user.bio || 'Ingen presentation.'}</p>
+
+            ${user.pastJobs ? `
+                <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 16px; margin-bottom: 4px;">TIDIGARE ERFARENHET</p>
+                <p class="bio-text">${user.pastJobs}</p>
+            ` : ''}
+
+            ${isCandidate ? `
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 6px;">CV</p>
+                    ${user.cvUrl ? `
+                        <a href="${user.cvUrl}" target="_blank" class="btn btn-primary" style="font-size:0.9rem;">
+                            <i class="fa-solid fa-file-pdf"></i> Öppna / Ladda ner CV (PDF)
+                        </a>
+                    ` : `
+                        <span style="font-size:0.85rem; color:var(--text-muted); display:block; background:var(--bg-app); padding:10px 14px; border-radius:var(--radius-sm); border:1px dashed var(--border);">
+                            <i class="fa-solid fa-file-excel" style="color:var(--text-light); margin-right:6px;"></i> Inget CV
+                        </span>
+                    `}
+                </div>
+            ` : ''}
+
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 16px; margin-bottom: 6px;">ROLLER & KOMPETENSER</p>
+            <div class="view-tags-group">
+                ${(user.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--text-muted);">Inga angivna</span>'}
+            </div>
+
+            <button class="btn btn-outline" style="margin-top:20px; color:var(--accent-red); border-color:var(--accent-red);" onclick="requestDeleteFavorite('${user.id}', '${user.name}');">
+                <i class="fa-solid fa-trash-can"></i> Ta bort från Sparade
+            </button>
+        `;
+
+        document.getElementById('profileModal').classList.add('active');
+    };
+
+    window.closeProfileModal = () => {
+        document.getElementById('profileModal').classList.remove('active');
+    };
+
+    window.switchTab = (el, tabId) => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('tab-feed').style.display = tabId === 'tab-feed' ? 'flex' : 'none';
+        document.getElementById('tab-saved').style.display = tabId === 'tab-saved' ? 'flex' : 'none';
+        document.getElementById('tab-profile').style.display = tabId === 'tab-profile' ? 'flex' : 'none';
+
+        if (tabId === 'tab-saved') renderSavedList();
+    };
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registrerad!', reg))
+                .catch(err => console.error('Fel vid registrering av Service Worker:', err));
+        });
+    }
+</script>
+</body>
+</html>
