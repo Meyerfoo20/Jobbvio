@@ -201,6 +201,72 @@
         .view-tags-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .tag-display { background: var(--bg-app); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--secondary); }
 
+        /* FILTER BAR STYLE */
+        .filter-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* NY SNYGG DROP-DOWN DESIGN */
+        .filter-select {
+            flex: 1;
+            width: 100%;
+            padding: 10px 36px 10px 14px; /* Plats för pfeil till höger */
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--secondary);
+            background-color: var(--card-bg);
+            
+            /* Dölj webbläsarens standardpil */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            /* Egen, stilren pil (samma färg som var(--secondary)) */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230F172A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px top 50%;
+            background-size: 10px auto;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        /* Hover- och fokuseffekter */
+        .filter-select:hover {
+            border-color: var(--primary);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); /* Mjuk orange glöd */
+        }
+
+        /* Styling för alternativen i listan */
+        .filter-select option {
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 10px;
+        }
+
         .swipe-stack {
             position: relative;
             flex: 1;
@@ -538,6 +604,26 @@
 
         <div class="app-main">
             <div id="tab-feed" class="card-container">
+                <div id="feedFilterContainer" class="filter-card" style="display: none;">
+                    <div class="filter-row">
+                        <select id="filterInterestSelect" class="filter-select" onchange="applyFeedFilters()">
+                            <option value="all">Alla kandidater i flödet</option>
+                            <option value="interested">❤️ Endast de som visat intresse</option>
+                        </select>
+                    </div>
+                    <div class="filter-row">
+                        <select id="filterRoleSelect" class="filter-select" onchange="applyFeedFilters()">
+                            <option value="all">Alla roller</option>
+                            <option value="Kock">Kock</option>
+                            <option value="Servitris / Servitör">Servitris / Servitör</option>
+                            <option value="Bartender">Bartender</option>
+                            <option value="Diskare">Diskare</option>
+                            <option value="Hovmästare">Hovmästare</option>
+                            <option value="Extra vid behov">Extra vid behov</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div id="feedContent">Laddar flöde...</div>
             </div>
 
@@ -952,7 +1038,15 @@
 
         const targetRole = currentUserData.role === 'candidate' ? 'restaurant' : 'candidate';
         const feedContainer = document.getElementById('feedContent');
+        const filterContainer = document.getElementById('feedFilterContainer');
+        
         feedContainer.innerHTML = '<p style="text-align:center; padding:20px;">Hämtar flöde...</p>';
+
+        if (currentUserData.role === 'restaurant') {
+            filterContainer.style.display = 'flex';
+        } else {
+            filterContainer.style.display = 'none';
+        }
 
         try {
             const querySnapshot = await getDocs(collection(db, "users"));
@@ -965,27 +1059,7 @@
                 }
             });
 
-            const favorites = currentUserData.favorites || [];
-            feedItems = allUsers.filter(user => !favorites.includes(user.id));
-
-            if (feedItems.length === 0) {
-                feedContainer.innerHTML = `
-                    <div class="empty-feed">
-                        <i class="fa-solid fa-users-slash"></i>
-                        <h3>Inga fler ${targetRole === 'restaurant' ? 'restauranger' : 'kandidater'} att visa</h3>
-                        <p>Du har gått igenom alla tillgängliga profiler eller sparat dem.</p>
-                    </div>`;
-                renderSavedList();
-                return;
-            }
-
-            if (currentUserData.role === 'candidate') {
-                renderCandidateFeed();
-            } else {
-                currentSwipeIndex = 0;
-                renderRestaurantSwipeFeed();
-            }
-
+            applyFeedFilters();
             renderSavedList();
         } catch (err) {
             console.error("Fel vid laddning av flöde:", err);
@@ -993,19 +1067,53 @@
         }
     }
 
-    function renderCandidateFeed() {
-        const container = document.getElementById('feedContent');
-        container.innerHTML = '';
+    // TILLÄMPA FILTER OCH SORTERING
+    window.applyFeedFilters = () => {
+        if (!currentUserData) return;
 
+        const favorites = currentUserData.favorites || [];
+        let items = allUsers.filter(user => !favorites.includes(user.id));
+
+        if (currentUserData.role === 'restaurant') {
+            const interestFilter = document.getElementById('filterInterestSelect').value;
+            const roleFilter = document.getElementById('filterRoleSelect').value;
+
+            // Filter 1: De som gillat/visat intresse för restaurangen
+            if (interestFilter === 'interested') {
+                items = items.filter(u => Array.isArray(u.favorites) && u.favorites.includes(auth.currentUser.uid));
+            }
+
+            // Filter 2: Specifika roller
+            if (roleFilter !== 'all') {
+                items = items.filter(u => Array.isArray(u.tags) && u.tags.includes(roleFilter));
+            }
+        }
+
+        feedItems = items;
+        currentSwipeIndex = 0;
+
+        const feedContainer = document.getElementById('feedContent');
         if (feedItems.length === 0) {
-            container.innerHTML = `
+            const targetRole = currentUserData.role === 'candidate' ? 'restauranger' : 'kandidater';
+            feedContainer.innerHTML = `
                 <div class="empty-feed">
-                    <i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>
-                    <h3>Inga fler restauranger i flödet!</h3>
-                    <p>Du har sparat alla intressanta restauranger.</p>
+                    <i class="fa-solid fa-users-slash"></i>
+                    <h3>Inga tillgängliga ${targetRole}</h3>
+                    <p>Inga profiler matchar dina nuvarande filterinställningar.</p>
                 </div>`;
             return;
         }
+
+        if (currentUserData.role === 'candidate') {
+            renderCandidateFeed();
+        } else {
+            renderRestaurantSwipeFeed();
+        }
+    };
+
+    function renderCandidateFeed() {
+        const container = document.getElementById('feedContent');
+        container.innerHTML = '';
 
         feedItems.forEach(item => {
             const card = document.createElement('div');
@@ -1041,21 +1149,31 @@
                 <div class="empty-feed">
                     <i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>
                     <h3>Alla kandidater genomgångna!</h3>
-                    <p>Visa sparade kandidater under fliken <b>Sparade</b>.</p>
+                    <p>Du har gått igenom alla kandidater i urvalet. Ändra filtren ovan eller visa sparade kandidater under fliken <b>Sparade</b>.</p>
                 </div>`;
             return;
         }
 
         const item = feedItems[currentSwipeIndex];
+        const hasLikedMe = Array.isArray(item.favorites) && item.favorites.includes(auth.currentUser.uid);
 
         container.innerHTML = `
             <div class="swipe-stack">
                 <div class="swipe-card" id="activeSwipeCard">
                     <div>
-                        <h3 class="profile-header-title">${item.name}</h3>
-                        <span class="role-badge-pill"><i class="fa-solid fa-user"></i> Jobbsökande</span>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <h3 class="profile-header-title">${item.name}</h3>
+                                <span class="role-badge-pill"><i class="fa-solid fa-user"></i> Jobbsökande</span>
+                            </div>
+                            ${hasLikedMe ? `
+                                <span style="background:var(--accent-green-light); color:var(--accent-green); font-size:0.75rem; font-weight:800; padding:6px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-heart"></i> Har gillat er!
+                                </span>
+                            ` : ''}
+                        </div>
 
-                        <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
+                        <p class="location-tag" style="margin-top:10px;"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
                         <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
                         <p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience || 'Ej angiven'}</p>
 
