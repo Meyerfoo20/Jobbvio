@@ -219,11 +219,10 @@
             gap: 8px;
         }
 
-        /* NY SNYGG DROP-DOWN DESIGN */
         .filter-select {
             flex: 1;
             width: 100%;
-            padding: 10px 36px 10px 14px; /* Plats för pfeil till höger */
+            padding: 10px 36px 10px 14px;
             border: 1.5px solid var(--border);
             border-radius: var(--radius-sm);
             font-family: inherit;
@@ -232,12 +231,10 @@
             color: var(--secondary);
             background-color: var(--card-bg);
             
-            /* Dölj webbläsarens standardpil */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
 
-            /* Egen, stilren pil (samma färg som var(--secondary)) */
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230F172A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
             background-repeat: no-repeat;
             background-position: right 14px top 50%;
@@ -248,7 +245,6 @@
             cursor: pointer;
         }
 
-        /* Hover- och fokuseffekter */
         .filter-select:hover {
             border-color: var(--primary);
         }
@@ -256,10 +252,9 @@
         .filter-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); /* Mjuk orange glöd */
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
         }
 
-        /* Styling för alternativen i listan */
         .filter-select option {
             background: var(--card-bg);
             color: var(--text-main);
@@ -416,6 +411,27 @@
             display: flex;
             gap: 10px;
         }
+
+        .avatar-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .avatar-placeholder {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--bg-app);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
@@ -526,11 +542,36 @@
                     </div>
                 </div>
 
+                <div class="form-group" id="group-avatar" style="display: none;">
+                    <label class="form-label">Profilbild (komprimeras automatiskt)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-image"></i>
+                        <input type="file" id="prof-avatar-file" class="form-file-input" accept="image/*">
+                    </div>
+                    <span id="avatar-file-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; display:block;"></span>
+                </div>
+
+                <div class="form-group" id="group-age" style="display: none;">
+                    <label class="form-label">Ålder</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-cake-candles"></i>
+                        <input type="number" id="prof-age" class="form-input" placeholder="T.ex. 24" min="15" max="99">
+                    </div>
+                </div>
+
                 <div class="form-group" id="group-contact" style="display: none;">
                     <label class="form-label">Kontaktperson</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-id-badge"></i>
-                        <input type="text" id="prof-contact-person" class="form-input" placeholder="T.ex. Johan Lind (Köksmästare)">
+                        <input type="text" id="prof-contact-person" class="form-input" placeholder="T.ex. Johan Svensson (Köksmästare)">
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-orgno" style="display: none;">
+                    <label class="form-label">Organisationsnummer</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-building"></i>
+                        <input type="text" id="prof-orgno" class="form-input" placeholder="T.ex. 556123-4567">
                     </div>
                 </div>
 
@@ -569,7 +610,7 @@
                 </div>
 
                 <div class="form-group" id="group-cv" style="display: none;">
-                    <label class="form-label">Ladda upp CV (PDF-format)</label>
+                    <label class="form-label">Ladda upp CV (PDF-format, max 1 MB)</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-file-pdf"></i>
                         <input type="file" id="prof-cv-file" class="form-file-input" accept="application/pdf">
@@ -634,9 +675,15 @@
 
             <div id="tab-profile" class="card-container" style="display: none;">
                 <div class="profile-card">
-                    <h2 id="view-profile-name" class="profile-header-title">Laddar...</h2>
-                    <span id="view-profile-role" class="role-badge-pill"></span>
-                    
+                    <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+                        <div id="view-profile-avatar-container"></div>
+                        <div>
+                            <h2 id="view-profile-name" class="profile-header-title">Laddar...</h2>
+                            <span id="view-profile-role" class="role-badge-pill"></span>
+                        </div>
+                    </div>
+
+                    <p id="view-profile-age" class="location-tag" style="display: none;"><i class="fa-solid fa-cake-candles"></i> <span></span></p>
                     <p id="view-profile-contact" class="location-tag" style="display: none;"><i class="fa-regular fa-address-card"></i> <span></span></p>
                     <p id="view-profile-location" class="location-tag"><i class="fa-solid fa-location-dot"></i> <span></span></p>
                     <p id="view-profile-phone" class="location-tag"><i class="fa-solid fa-phone"></i> <span></span></p>
@@ -696,7 +743,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBewQCcVn-pkR1Gw9hAs7BocAmcFP1xy-o",
@@ -711,7 +757,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     let currentRole = 'candidate';
     let currentUserData = null;
@@ -724,7 +769,51 @@
     const CANDIDATE_TAGS = ['Kock', 'Servitris / Servitör', 'Bartender', 'Diskare', 'Hovmästare', 'Extra vid behov'];
     const RESTAURANT_TAGS = ['Söker Kock', 'Söker Servering', 'Söker Disk', 'Söker Hovmästare', 'Söker "Extra vid behov"'];
 
-    // CUSTOM TOAST NOTIFICATION SYSTEM
+    // HJÄLPFUNKTION: Konvertera filer till Base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // AUTOMATISK BILD-KOMPRIMERING MED CANVAS
+    function compressImage(file, maxWidth = 500, quality = 0.75) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Konvertera till komprimerad JPG (Base64)
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedBase64);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    }
+
+    // TOAST NOTIFIKATIONER
     window.showToast = (message, type = 'info') => {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -831,6 +920,10 @@
             document.getElementById('prof-location').placeholder = 'T.ex. Helsingborg';
             document.getElementById('lbl-bio').innerText = 'Kort Presentation / Om dig';
             document.getElementById('lbl-tags').innerText = 'Din/dina Roller';
+            
+            document.getElementById('group-age').style.display = 'block';
+            document.getElementById('group-avatar').style.display = 'block';
+            
             document.getElementById('group-contact').style.display = 'none';
             document.getElementById('group-experience').style.display = 'block';
             document.getElementById('group-past-jobs').style.display = 'block';
@@ -838,11 +931,15 @@
         } else {
             document.getElementById('editor-subtitle').innerText = 'Profil för restaurang';
             document.getElementById('lbl-name').innerText = 'Restaurangens Namn';
-            document.getElementById('prof-name').placeholder = 'T.ex. Bistro Brasserie';
+            document.getElementById('prof-name').placeholder = 'T.ex. Bistro Helsingborg';
             document.getElementById('icn-name').className = 'fa-solid fa-store';
             document.getElementById('lbl-location').innerText = 'Adress';
             document.getElementById('lbl-bio').innerText = 'Om Restaurangen';
             document.getElementById('lbl-tags').innerText = 'Roller ni söker';
+
+            document.getElementById('group-age').style.display = 'none';
+            document.getElementById('group-avatar').style.display = 'none';
+
             document.getElementById('group-contact').style.display = 'block';
             document.getElementById('group-experience').style.display = 'none';
             document.getElementById('group-past-jobs').style.display = 'none';
@@ -856,15 +953,24 @@
             document.getElementById('prof-bio').value = currentUserData.bio || '';
             
             if (role === 'candidate') {
+                document.getElementById('prof-age').value = currentUserData.age || '';
                 document.getElementById('prof-experience').value = currentUserData.experience || 'Ny i branschen';
                 document.getElementById('prof-past-jobs').value = currentUserData.pastJobs || '';
                 
+                const avatarStatus = document.getElementById('avatar-file-status');
+                if (currentUserData.avatarUrl) {
+                    avatarStatus.innerText = "En profilbild finns sparad. Välj en ny fil för att ersätta.";
+                    avatarStatus.style.color = "var(--accent-green)";
+                } else {
+                    avatarStatus.innerText = "Ingen profilbild sparad ännu.";
+                }
+
                 const cvStatus = document.getElementById('cv-file-status');
                 if (currentUserData.cvUrl) {
-                    cvStatus.innerText = "Ett CV finns redan uppladdat. Välj ny fil för att ersätta.";
+                    cvStatus.innerText = "Ett CV finns sparat. Välj en ny fil för att ersätta.";
                     cvStatus.style.color = "var(--accent-green)";
                 } else {
-                    cvStatus.innerText = "Inget CV uppladdat ännu.";
+                    cvStatus.innerText = "Inget CV sparat ännu.";
                 }
             } else {
                 document.getElementById('prof-contact-person').value = currentUserData.contactPerson || '';
@@ -899,10 +1005,14 @@
         });
     }
 
+    // SPARAR PROFIL DIREKT I FIRESTORE (MED AUTOMATISK BILD-KOMPRIMERING)
     window.saveProfileToFirebase = async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
-        if (!user) return;
+        if (!user) {
+            showToast("Ingen inloggad användare hittades.", "error");
+            return;
+        }
 
         const saveBtn = document.getElementById('btn-save-profile');
         saveBtn.disabled = true;
@@ -920,40 +1030,57 @@
             updatedAt: new Date().toISOString()
         };
 
-        if (role === 'candidate') {
-            profileData.experience = document.getElementById('prof-experience').value;
-            profileData.pastJobs = document.getElementById('prof-past-jobs').value;
-
-            const cvFileInput = document.getElementById('prof-cv-file');
-            if (cvFileInput.files.length > 0) {
-                const cvFile = cvFileInput.files[0];
-                if (cvFile.type === "application/pdf") {
-                    try {
-                        const cvRef = ref(storage, `cvs/${user.uid}_${cvFile.name}`);
-                        await uploadBytes(cvRef, cvFile);
-                        const downloadUrl = await getDownloadURL(cvRef);
-                        profileData.cvUrl = downloadUrl;
-                        profileData.cvFileName = cvFile.name;
-                    } catch (uploadError) {
-                        console.error("Fel vid CV-uppladdning:", uploadError);
-                        showToast("CV kunde inte laddas upp.", "error");
-                    }
-                } else {
-                    showToast("Enbart PDF-filer tillåts för CV.", "error");
-                }
-            }
-        } else {
-            profileData.contactPerson = document.getElementById('prof-contact-person').value;
-        }
-
         try {
+            if (role === 'candidate') {
+                profileData.age = document.getElementById('prof-age').value;
+                profileData.experience = document.getElementById('prof-experience').value;
+                profileData.pastJobs = document.getElementById('prof-past-jobs').value;
+
+                // Hantera profilbild med AUTOMATISK KOMPRIMERING
+                const avatarFileInput = document.getElementById('prof-avatar-file');
+                if (avatarFileInput && avatarFileInput.files.length > 0) {
+                    const avatarFile = avatarFileInput.files[0];
+                    try {
+                        const compressedBase64 = await compressImage(avatarFile, 500, 0.75);
+                        profileData.avatarUrl = compressedBase64;
+                    } catch (imgError) {
+                        console.error("Fel vid bildkomprimering:", imgError);
+                        showToast("Kunde inte behandla bildfilen.", "error");
+                    }
+                }
+
+                // Hantera CV (PDF) via Base64
+                const cvFileInput = document.getElementById('prof-cv-file');
+                if (cvFileInput && cvFileInput.files.length > 0) {
+                    const cvFile = cvFileInput.files[0];
+                    if (cvFile.type === "application/pdf") {
+                        if (cvFile.size > 1024 * 1024) { // Max 1 MB för PDF
+                            showToast("CV-filen är för stor (max 1 MB).", "error");
+                            saveBtn.disabled = false;
+                            saveBtn.innerHTML = 'Spara Profil <i class="fa-solid fa-check"></i>';
+                            return;
+                        }
+                        const base64Cv = await fileToBase64(cvFile);
+                        profileData.cvUrl = base64Cv;
+                        profileData.cvFileName = cvFile.name;
+                    } else {
+                        showToast("Enbart PDF-filer tillåts för CV.", "error");
+                    }
+                }
+            } else {
+                profileData.contactPerson = document.getElementById('prof-contact-person').value;
+            }
+
+            // Spara allt direkt i Firestore
             await setDoc(doc(db, "users", user.uid), profileData, { merge: true });
             currentUserData = { ...currentUserData, ...profileData };
             renderProfileView();
             loadFeedData();
             showToast("Profilen har sparats!", "success");
             goToScreen('screen-app');
+
         } catch (error) {
+            console.error("Fel vid sparande av profil:", error);
             showToast("Kunde inte spara profil: " + error.message, "error");
         } finally {
             saveBtn.disabled = false;
@@ -969,6 +1096,21 @@
         document.getElementById('view-profile-name').innerText = currentUserData.name || 'Inget namn angivet';
         document.getElementById('view-profile-role').innerText = isCandidate ? 'Jobbsökande' : 'Restaurang';
         
+        const avatarContainer = document.getElementById('view-profile-avatar-container');
+        if (currentUserData.avatarUrl) {
+            avatarContainer.innerHTML = `<img src="${currentUserData.avatarUrl}" alt="${currentUserData.name}" class="avatar-img">`;
+        } else {
+            avatarContainer.innerHTML = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+        }
+
+        const ageEl = document.getElementById('view-profile-age');
+        if (isCandidate && currentUserData.age) {
+            ageEl.style.display = 'flex';
+            ageEl.querySelector('span').innerText = `${currentUserData.age} år`;
+        } else {
+            ageEl.style.display = 'none';
+        }
+
         const locSpan = document.getElementById('view-profile-location').querySelector('span');
         locSpan.innerText = currentUserData.location || 'Ej angivet';
 
@@ -999,8 +1141,8 @@
             cvSec.style.display = 'block';
             if (currentUserData.cvUrl) {
                 cvContainer.innerHTML = `
-                    <a href="${currentUserData.cvUrl}" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; padding: 10px; border-color: var(--primary); color: var(--primary-hover);">
-                        <i class="fa-solid fa-file-pdf" style="color: #EF4444; font-size: 1.1rem;"></i> Visa uppladdat CV (PDF)
+                    <a href="${currentUserData.cvUrl}" download="CV.pdf" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; padding: 10px; border-color: var(--primary); color: var(--primary-hover);">
+                        <i class="fa-solid fa-file-pdf" style="color: #EF4444; font-size: 1.1rem;"></i> Visa/Ladda ner CV (PDF)
                     </a>`;
             } else {
                 cvContainer.innerHTML = `<span style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-file-excel" style="color:var(--text-light);"></i> Inget CV uppladdat</span>`;
@@ -1032,7 +1174,7 @@
         }
     }
 
-    /* FLÖDES- OCH SPARADE PROFILER-LOGIK*/
+    /* FLÖDES- OCH SPARADE PROFILER-LOGIK */
     async function loadFeedData() {
         if (!currentUserData) return;
 
@@ -1078,12 +1220,10 @@
             const interestFilter = document.getElementById('filterInterestSelect').value;
             const roleFilter = document.getElementById('filterRoleSelect').value;
 
-            // Filter 1: De som gillat/visat intresse för restaurangen
             if (interestFilter === 'interested') {
                 items = items.filter(u => Array.isArray(u.favorites) && u.favorites.includes(auth.currentUser.uid));
             }
 
-            // Filter 2: Specifika roller
             if (roleFilter !== 'all') {
                 items = items.filter(u => Array.isArray(u.tags) && u.tags.includes(roleFilter));
             }
@@ -1161,9 +1301,13 @@
             <div class="swipe-stack">
                 <div class="swipe-card" id="activeSwipeCard">
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div>
-                                <h3 class="profile-header-title">${item.name}</h3>
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+                            ${item.avatarUrl 
+                                ? `<img src="${item.avatarUrl}" alt="${item.name}" class="avatar-img">`
+                                : `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`
+                            }
+                            <div style="flex:1;">
+                                <h3 class="profile-header-title" style="margin:0;">${item.name}</h3>
                                 <span class="role-badge-pill"><i class="fa-solid fa-user"></i> Jobbsökande</span>
                             </div>
                             ${hasLikedMe ? `
@@ -1173,7 +1317,8 @@
                             ` : ''}
                         </div>
 
-                        <p class="location-tag" style="margin-top:10px;"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
+                        ${item.age ? `<p class="location-tag"><i class="fa-solid fa-cake-candles"></i> ${item.age} år</p>` : ''}
+                        <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
                         <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
                         <p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience || 'Ej angiven'}</p>
 
@@ -1221,7 +1366,6 @@
         }
     };
 
-    // VÄXLA FAVORITMARKERING OCH BEKRÄFTELSE VID BORTTAGNING
     window.requestDeleteFavorite = (targetId, name = '') => {
         pendingDeleteId = targetId;
         const confirmText = name ? `Vill du ta bort "${name}" från dina sparade favoriter?` : `Vill du ta bort personen från dina sparade favoriter?`;
@@ -1283,7 +1427,6 @@
         }
     };
 
-    // RENDER SPARADE PROFILER
     function renderSavedList() {
         const container = document.getElementById('savedListContent');
         const favorites = currentUserData?.favorites || [];
@@ -1310,7 +1453,17 @@
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
                 <div onclick="openProfileModal('${item.id}')">
-                    <h3 class="profile-header-title">${item.name}</h3>
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                        ${item.avatarUrl 
+                            ? `<img src="${item.avatarUrl}" alt="${item.name}" class="avatar-img" style="width:48px; height:48px;">`
+                            : `<div class="avatar-placeholder" style="width:48px; height:48px; font-size:1.1rem;"><i class="fa-solid fa-user"></i></div>`
+                        }
+                        <div>
+                            <h3 class="profile-header-title" style="font-size:1.1rem; margin:0;">${item.name}</h3>
+                            ${item.age ? `<span style="font-size:0.8rem; color:var(--text-muted);">${item.age} år</span>` : ''}
+                        </div>
+                    </div>
+                    
                     <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej plats'}</p>
                     <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
                     ${item.experience ? `<p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience}</p>` : ''}
@@ -1325,7 +1478,6 @@
         });
     }
 
-    // VISA APPARATEN FÖR HEL PROFIL (MODAL)
     window.openProfileModal = (userId) => {
         const user = allUsers.find(u => u.id === userId);
         if (!user) return;
@@ -1334,10 +1486,19 @@
         const isCandidate = user.role === 'candidate';
 
         modalBody.innerHTML = `
-            <h2 class="profile-header-title" style="margin-bottom:4px;">${user.name}</h2>
-            <span class="role-badge-pill">${isCandidate ? 'Jobbsökande' : 'Restaurang'}</span>
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+                ${user.avatarUrl 
+                    ? `<img src="${user.avatarUrl}" alt="${user.name}" class="avatar-img">`
+                    : `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`
+                }
+                <div>
+                    <h2 class="profile-header-title" style="margin:0;">${user.name}</h2>
+                    <span class="role-badge-pill">${isCandidate ? 'Jobbsökande' : 'Restaurang'}</span>
+                </div>
+            </div>
             
-            <p class="location-tag" style="margin-top:12px;"><i class="fa-solid fa-location-dot"></i> Plats/Adress: ${user.location || 'Ej angiven'}</p>
+            ${user.age ? `<p class="location-tag"><i class="fa-solid fa-cake-candles"></i> Ålder: ${user.age} år</p>` : ''}
+            <p class="location-tag"><i class="fa-solid fa-location-dot"></i> Plats/Adress: ${user.location || 'Ej angiven'}</p>
             <p class="location-tag"><i class="fa-solid fa-phone"></i> Tel: <a href="tel:${user.phone}" style="color:var(--primary-hover); font-weight:700; text-decoration:none;">${user.phone || 'Ej angivet'}</a></p>
             ${user.email ? `<p class="location-tag"><i class="fa-regular fa-envelope"></i> E-post: <a href="mailto:${user.email}" style="color:var(--primary-hover); text-decoration:none;">${user.email}</a></p>` : ''}
             ${user.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontaktperson: ${user.contactPerson}</p>` : ''}
@@ -1355,7 +1516,7 @@
                 <div style="margin-top: 16px;">
                     <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 6px;">CV</p>
                     ${user.cvUrl ? `
-                        <a href="${user.cvUrl}" target="_blank" class="btn btn-primary" style="font-size:0.9rem;">
+                        <a href="${user.cvUrl}" download="CV.pdf" target="_blank" class="btn btn-primary" style="font-size:0.9rem;">
                             <i class="fa-solid fa-file-pdf"></i> Öppna / Ladda ner CV (PDF)
                         </a>
                     ` : `
