@@ -1,0 +1,9 @@
+const firebaseConfig = {
+        apiKey: "AIzaSyBewQCcVn-pkR1Gw9hAs7BocAmcFP1xy-o",
+        authDomain: "jobbvio-c8d6f.firebaseapp.com",
+        projectId: "jobbvio-c8d6f",
+        storageBucket: "jobbvio-c8d6f.firebasestorage.app",
+        messagingSenderId: "83919499971",
+        appId: "1:83919499971:web:c61b5fd47a3f13695d2876",
+        measurementId: "G-JF71K1267P"
+    };
