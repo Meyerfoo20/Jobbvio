@@ -50,6 +50,30 @@
         .form-file-input-hidden {
             display: none !important;
         }
+
+        /* Hero-bild för restaurangkort i flödet */
+        .restaurant-hero-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .restaurant-hero-placeholder {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #1E293B, #0F172A);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted, #94A3B8);
+            font-size: 2.5rem;
+            border: 1px solid var(--border, #334155);
+        }
     </style>
 </head>
 <body>
@@ -235,11 +259,11 @@
                     </div>
                 </div>
 
-                <div class="form-group" id="group-avatar" style="display: none;">
-                    <label class="form-label">Profilbild (komprimeras automatiskt)</label>
+                <div class="form-group" id="group-avatar">
+                    <label class="form-label" id="lbl-avatar">Profilbild (komprimeras automatiskt)</label>
                     <label for="prof-avatar-file" class="custom-file-upload">
                         <i class="fa-solid fa-image"></i>
-                        <span id="prof-avatar-filename">Välj profilbild...</span>
+                        <span id="prof-avatar-filename">Välj bild...</span>
                     </label>
                     <input type="file" id="prof-avatar-file" class="form-file-input-hidden" accept="image/*" onchange="updateFileName(this, 'prof-avatar-filename')">
                     <span id="avatar-file-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:6px; display:block;"></span>
@@ -471,7 +495,7 @@
         if (input.files && input.files.length > 0) {
             labelSpan.innerText = input.files[0].name;
         } else {
-            labelSpan.innerText = labelId.includes('avatar') ? 'Välj profilbild...' : 'Välj CV-fil (PDF)...';
+            labelSpan.innerText = labelId.includes('avatar') ? 'Välj bild...' : 'Välj CV-fil (PDF)...';
         }
     };
 
@@ -486,7 +510,7 @@
     }
 
     // Automatisk bild-komprimering med Canvas
-    function compressImage(file, maxWidth = 500, quality = 0.75) {
+    function compressImage(file, maxWidth = 800, quality = 0.75) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -708,10 +732,9 @@
             document.getElementById('prof-location').placeholder = 'T.ex. Helsingborg';
             document.getElementById('lbl-bio').innerText = 'Kort Presentation / Om dig';
             document.getElementById('lbl-tags').innerText = 'Din/dina Roller';
+            document.getElementById('lbl-avatar').innerText = 'Profilbild (komprimeras automatiskt)';
             
             document.getElementById('group-age').style.display = 'block';
-            document.getElementById('group-avatar').style.display = 'block';
-            
             document.getElementById('group-contact').style.display = 'none';
             document.getElementById('group-orgno').style.display = 'none';
             document.getElementById('group-experience').style.display = 'block';
@@ -725,15 +748,23 @@
             document.getElementById('lbl-location').innerText = 'Adress';
             document.getElementById('lbl-bio').innerText = 'Om Restaurangen';
             document.getElementById('lbl-tags').innerText = 'Roller ni söker';
+            document.getElementById('lbl-avatar').innerText = 'Logotyp / Hero-bild på restaurangen';
 
             document.getElementById('group-age').style.display = 'none';
-            document.getElementById('group-avatar').style.display = 'none';
-
             document.getElementById('group-contact').style.display = 'block';
             document.getElementById('group-orgno').style.display = 'block';
             document.getElementById('group-experience').style.display = 'none';
             document.getElementById('group-past-jobs').style.display = 'none';
             document.getElementById('group-cv').style.display = 'none';
+        }
+
+        const avatarStatus = document.getElementById('avatar-file-status');
+        if (currentUserData?.avatarUrl) {
+            avatarStatus.innerText = "En bild finns sparad. Välj en ny fil för att ersätta.";
+            avatarStatus.style.color = "var(--accent-green)";
+        } else {
+            avatarStatus.innerText = "Ingen bild sparad ännu.";
+            avatarStatus.style.color = "var(--text-muted)";
         }
 
         if (currentUserData) {
@@ -746,14 +777,6 @@
                 document.getElementById('prof-age').value = currentUserData.age || '';
                 document.getElementById('prof-experience').value = currentUserData.experience || 'Ny i branschen';
                 document.getElementById('prof-past-jobs').value = currentUserData.pastJobs || '';
-                
-                const avatarStatus = document.getElementById('avatar-file-status');
-                if (currentUserData.avatarUrl) {
-                    avatarStatus.innerText = "En profilbild finns sparad. Välj en ny fil för att ersätta.";
-                    avatarStatus.style.color = "var(--accent-green)";
-                } else {
-                    avatarStatus.innerText = "Ingen profilbild sparad ännu.";
-                }
 
                 const cvStatus = document.getElementById('cv-file-status');
                 if (currentUserData.cvUrl) {
@@ -761,6 +784,7 @@
                     cvStatus.style.color = "var(--accent-green)";
                 } else {
                     cvStatus.innerText = "Inget CV sparat ännu.";
+                    cvStatus.style.color = "var(--text-muted)";
                 }
             } else {
                 document.getElementById('prof-contact-person').value = currentUserData.contactPerson || '';
@@ -821,22 +845,23 @@
         };
 
         try {
+            // Profilbild för både kandidat och restaurang
+            const avatarFileInput = document.getElementById('prof-avatar-file');
+            if (avatarFileInput && avatarFileInput.files.length > 0) {
+                const avatarFile = avatarFileInput.files[0];
+                try {
+                    const compressedBase64 = await compressImage(avatarFile, 800, 0.75);
+                    profileData.avatarUrl = compressedBase64;
+                } catch (imgError) {
+                    console.error("Fel vid bildkomprimering:", imgError);
+                    showToast("Kunde inte behandla bildfilen.", "error");
+                }
+            }
+
             if (role === 'candidate') {
                 profileData.age = document.getElementById('prof-age').value;
                 profileData.experience = document.getElementById('prof-experience').value;
                 profileData.pastJobs = document.getElementById('prof-past-jobs').value;
-
-                const avatarFileInput = document.getElementById('prof-avatar-file');
-                if (avatarFileInput && avatarFileInput.files.length > 0) {
-                    const avatarFile = avatarFileInput.files[0];
-                    try {
-                        const compressedBase64 = await compressImage(avatarFile, 500, 0.75);
-                        profileData.avatarUrl = compressedBase64;
-                    } catch (imgError) {
-                        console.error("Fel vid bildkomprimering:", imgError);
-                        showToast("Kunde inte behandla bildfilen.", "error");
-                    }
-                }
 
                 const cvFileInput = document.getElementById('prof-cv-file');
                 if (cvFileInput && cvFileInput.files.length > 0) {
@@ -875,7 +900,6 @@
             saveBtn.innerHTML = 'Spara Profil <i class="fa-solid fa-check"></i>';
         }
     };
-    
 
     function renderProfileView() {
         if (!currentUserData) return;
@@ -889,7 +913,7 @@
         if (currentUserData.avatarUrl) {
             avatarContainer.innerHTML = `<img src="${currentUserData.avatarUrl}" alt="${currentUserData.name}" class="avatar-img">`;
         } else {
-            avatarContainer.innerHTML = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+            avatarContainer.innerHTML = `<div class="avatar-placeholder"><i class="fa-solid ${isCandidate ? 'fa-user' : 'fa-store'}"></i></div>`;
         }
 
         const ageEl = document.getElementById('view-profile-age');
@@ -1001,7 +1025,18 @@
         if (!currentUserData) return;
 
         const favorites = currentUserData.favorites || [];
+        const passed = currentUserData.passed || {};
+        const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+
         let items = allUsers.filter(user => !favorites.includes(user.id));
+
+        items = items.filter(user => {
+            const passedTimestamp = passed[user.id];
+            if (!passedTimestamp) return true;
+            
+            return (now - passedTimestamp) > SEVEN_DAYS_MS;
+        });
 
         if (currentUserData.role === 'restaurant') {
             const interestFilter = document.getElementById('filterInterestSelect').value;
@@ -1050,9 +1085,15 @@
                 <button class="like-icon-btn" title="Spara till favoriter" onclick="toggleFavorite('${item.id}')">
                     <i class="fa-regular fa-heart"></i>
                 </button>
+
+                ${item.avatarUrl 
+                    ? `<img src="${item.avatarUrl}" alt="${item.name}" class="restaurant-hero-img">`
+                    : `<div class="restaurant-hero-placeholder"><i class="fa-solid fa-store"></i></div>`
+                }
+
                 <h3 class="profile-header-title">${item.name}</h3>
                 <span class="role-badge-pill"><i class="fa-solid fa-store"></i> Restaurang</span>
-                <p class="location-tag"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
+                <p class="location-tag" style="margin-top:6px;"><i class="fa-solid fa-location-dot"></i> ${item.location || 'Ej angiven plats'}</p>
                 <p class="location-tag"><i class="fa-solid fa-phone"></i> ${item.phone || 'Ej telefon'}</p>
                 ${item.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontakt: ${item.contactPerson}</p>` : ''}
                 
@@ -1145,12 +1186,38 @@
             card.style.opacity = '0';
         }
 
-        if (save) {
-            await toggleFavorite(item.id);
-        } else {
-            currentSwipeIndex++;
-            renderRestaurantSwipeFeed();
+        if (item) {
+            if (save) {
+                if (auth.currentUser) {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    try {
+                        await updateDoc(userRef, { favorites: arrayUnion(item.id) });
+                        if (!currentUserData.favorites) currentUserData.favorites = [];
+                        currentUserData.favorites.push(item.id);
+                        showToast("Sparad i dina favoriter!", "success");
+                    } catch (e) {
+                        console.error("Kunde inte spara favorit:", e);
+                    }
+                }
+            } else {
+                if (!currentUserData.passed) currentUserData.passed = {};
+                currentUserData.passed[item.id] = Date.now();
+
+                if (auth.currentUser) {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    try {
+                        await updateDoc(userRef, {
+                            [`passed.${item.id}`]: Date.now()
+                        });
+                    } catch (e) {
+                        console.error("Kunde inte spara nekad profil:", e);
+                    }
+                }
+            }
         }
+
+        currentSwipeIndex++;
+        renderRestaurantSwipeFeed();
     };
 
     window.requestDeleteFavorite = (targetId, name = '') => {
@@ -1240,10 +1307,16 @@
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
                 <div onclick="openProfileModal('${item.id}')">
+                    ${item.role === 'restaurant' && item.avatarUrl 
+                        ? `<img src="${item.avatarUrl}" alt="${item.name}" class="restaurant-hero-img" style="height:120px;">`
+                        : ''
+                    }
                     <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-                        ${item.avatarUrl 
-                            ? `<img src="${item.avatarUrl}" alt="${item.name}" class="avatar-img" style="width:48px; height:48px;">`
-                            : `<div class="avatar-placeholder" style="width:48px; height:48px; font-size:1.1rem;"><i class="fa-solid fa-user"></i></div>`
+                        ${item.role === 'candidate'
+                            ? (item.avatarUrl 
+                                ? `<img src="${item.avatarUrl}" alt="${item.name}" class="avatar-img" style="width:48px; height:48px;">`
+                                : `<div class="avatar-placeholder" style="width:48px; height:48px; font-size:1.1rem;"><i class="fa-solid fa-user"></i></div>`)
+                            : ''
                         }
                         <div>
                             <h3 class="profile-header-title" style="font-size:1.1rem; margin:0;">${item.name}</h3>
@@ -1273,10 +1346,18 @@
         const isCandidate = user.role === 'candidate';
 
         modalBody.innerHTML = `
+            ${!isCandidate
+                ? (user.avatarUrl 
+                    ? `<img src="${user.avatarUrl}" alt="${user.name}" class="restaurant-hero-img">`
+                    : `<div class="restaurant-hero-placeholder"><i class="fa-solid fa-store"></i></div>`)
+                : ''
+            }
             <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
-                ${user.avatarUrl 
-                    ? `<img src="${user.avatarUrl}" alt="${user.name}" class="avatar-img">`
-                    : `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`
+                ${isCandidate
+                    ? (user.avatarUrl 
+                        ? `<img src="${user.avatarUrl}" alt="${user.name}" class="avatar-img">`
+                        : `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`)
+                    : ''
                 }
                 <div>
                     <h2 class="profile-header-title" style="margin:0;">${user.name}</h2>
