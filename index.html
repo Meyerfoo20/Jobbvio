@@ -74,6 +74,151 @@
             font-size: 2.5rem;
             border: 1px solid var(--border, #334155);
         }
+
+        /* ==================== SIDOMENY / DRAWER CSS ==================== */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-main, #F8FAFC);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 290px;
+            height: 100%;
+            background: #0F172A;
+            border-right: 1px solid var(--border, #334155);
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 10px 0 25px rgba(0,0,0,0.5);
+        }
+
+        .side-drawer.active {
+            left: 0;
+        }
+
+        .drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1E293B;
+        }
+
+        .drawer-header img {
+            height: 28px;
+        }
+
+        .drawer-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted, #94A3B8);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .drawer-body {
+            padding: 20px;
+            color: var(--text-main, #F8FAFC);
+            flex: 1;
+        }
+
+        .drawer-section {
+            margin-bottom: 24px;
+        }
+
+        .drawer-section-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--primary, #38BDF8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drawer-text {
+            font-size: 0.88rem;
+            color: #94A3B8;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .install-steps {
+            background: #1E293B;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+        }
+
+        .install-steps h4 {
+            font-size: 0.9rem;
+            margin: 0 0 8px 0;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .install-steps ol {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 0.82rem;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .install-steps ol li {
+            margin-bottom: 4px;
+        }
+
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border, #334155);
+            font-size: 0.75rem;
+            color: var(--text-muted, #94A3B8);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +226,57 @@
 <div class="app-shell">
 
     <div id="toast-container"></div>
+
+    <!-- SIDOMENY / DRAWER OVERLAY -->
+    <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+
+    <!-- SIDOMENY / DRAWER -->
+    <div id="side-drawer" class="side-drawer">
+        <div class="drawer-header">
+            <img src="images/logo.png" alt="Jobbvio Logo">
+            <button class="drawer-close-btn" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-body">
+            
+            <div class="drawer-section">
+                <div class="drawer-section-title"><i class="fa-solid fa-circle-info"></i> Om Jobbvio</div>
+                <p class="drawer-text">
+                    Jobbvio är den moderna matchningsplattformen för restaurangbranschen. Vi kopplar samman passionerade kandidater med krogarna som söker rätt personal – snabbt, enkelt och smidigt. "Ett lättare sätt att få jobb!"
+                </p>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-title"><i class="fa-solid fa-mobile-screen-button"></i> Ladda ned som Webbapp</div>
+                <p class="drawer-text"> Spara Jobbvio direkt på hemskärmen på din telefon för en snabbare app-upplevelse utan appbutiker!</p>
+                
+                <!-- iPhone instruktioner -->
+                <div class="install-steps">
+                    <h4><i class="fa-brands fa-apple" style="font-size:1.1rem;"></i> iPhone (Safari)</h4>
+                    <ol>
+                        <li>Öppna Jobbvio i <b>Safari</b>.</li>
+                        <li>Tryck på <b>Dela-knappen</b> <i class="fa-solid fa-share-nodes"></i> längst ned i menyn.</li>
+                        <li>Rulla ned och välj <b>"Lägg till på hemskärmen"</b> <i class="fa-regular fa-square-plus"></i>.</li>
+                        <li>Tryck på <b>Lägg till</b> uppe i hörnet.</li>
+                    </ol>
+                </div>
+
+                <!-- Android instruktioner -->
+                <div class="install-steps">
+                    <h4><i class="fa-brands fa-android" style="color: #4ADE80; font-size:1.1rem;"></i> Android (Chrome)</h4>
+                    <ol>
+                        <li>Öppna Jobbvio i <b>Chrome</b>.</li>
+                        <li>Tryck på de <b>tre punkterna</b> <i class="fa-solid fa-ellipsis-vertical"></i> i övre högra hörnet.</li>
+                        <li>Välj <b>"Lägg till på startskärmen"</b> eller <b>"Installera app"</b>.</li>
+                        <li>Följ instruktionerna för att godkänna.</li>
+                    </ol>
+                </div>
+            </div>
+
+        </div>
+        <div class="drawer-footer">
+            Jobbvio &copy; 2026 – Alla rättigheter förbehållna
+        </div>
+    </div>
 
     <div id="screen-welcome" class="screen active">
         <div class="auth-header">
@@ -110,6 +306,8 @@
             <div>
                 <button class="btn btn-primary" onclick="goToScreen('screen-register')">Fortsätt <i class="fa-solid fa-arrow-right"></i></button>
                 <div class="auth-switch-link">Har du redan ett konto? <a href="#" onclick="goToScreen('screen-login')">Logga in</a></div>
+                <!-- Knapp för information direkt på välkomstskärmen -->
+                <div class="auth-switch-link" style="margin-top:14px;"><a href="#" onclick="openDrawer()"><i class="fa-solid fa-circle-info"></i> Om appen & Ladda ned</a></div>
             </div>
         </div>
     </div>
@@ -356,7 +554,13 @@
 
     <div id="screen-app" class="screen">
         <div class="app-header">
+            <!-- HAMBURGER-KNAPP FÖR ATT ÖPPNA SIDOMENY -->
+            <button class="menu-btn" onclick="openDrawer()" title="Öppna meny">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            
             <div class="app-logo"><img src="images/logo.png" alt="Jobbvio Logo"></div>
+            
             <div class="user-badge" id="appUserBadge">
                 <i class="fa-solid fa-circle-user"></i> <span id="appRoleLabel">Användare</span>
             </div>
@@ -457,6 +661,19 @@
     </div>
 
 </div>
+
+<script>
+    /* Globala funktioner för att styra sidomenyn */
+    window.openDrawer = () => {
+        document.getElementById('side-drawer').classList.add('active');
+        document.getElementById('drawer-overlay').classList.add('active');
+    };
+
+    window.closeDrawer = () => {
+        document.getElementById('side-drawer').classList.remove('active');
+        document.getElementById('drawer-overlay').classList.remove('active');
+    };
+</script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
