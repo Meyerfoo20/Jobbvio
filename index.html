@@ -75,6 +75,109 @@
             border: 1px solid var(--border, #334155);
         }
 
+        /* Toggle för att växla mellan skift och restauranger */
+        .feed-view-toggle {
+            display: flex;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+
+        .view-tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            background: transparent;
+            color: #94A3B8;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .view-tab-btn.active {
+            background: var(--primary, #38BDF8);
+            color: #0F172A;
+        }
+
+        /* Kort för skiftannonser */
+        .shift-card {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .shift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .shift-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #F8FAFC;
+            margin: 0 0 4px 0;
+        }
+
+        .shift-restaurant {
+            font-size: 0.85rem;
+            color: #38BDF8;
+            font-weight: 600;
+        }
+
+        .shift-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38BDF8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .shift-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 14px 0;
+            background: #0F172A;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .shift-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #CBD5E1;
+        }
+
+        .shift-detail-item i {
+            color: #38BDF8;
+            width: 16px;
+        }
+
+        .shift-wage-tag {
+            grid-column: span 2;
+            font-weight: 800;
+            color: #4ADE80;
+        }
+
         /* ==================== SIDOMENY / DRAWER CSS ==================== */
         .menu-btn {
             background: none;
@@ -306,7 +409,6 @@
             <div>
                 <button class="btn btn-primary" onclick="goToScreen('screen-register')">Fortsätt <i class="fa-solid fa-arrow-right"></i></button>
                 <div class="auth-switch-link">Har du redan ett konto? <a href="#" onclick="goToScreen('screen-login')">Logga in</a></div>
-                <!-- Knapp för information direkt på välkomstskärmen -->
                 <div class="auth-switch-link" style="margin-top:14px;"><a href="#" onclick="openDrawer()"><i class="fa-solid fa-circle-info"></i> Om appen & Ladda ned</a></div>
             </div>
         </div>
@@ -568,6 +670,17 @@
 
         <div class="app-main">
             <div id="tab-feed" class="card-container">
+                
+                <!-- Toggle för att växla vy för kandidat -->
+                <div id="candidateFeedToggle" class="feed-view-toggle" style="display: none;">
+                    <button class="view-tab-btn active" id="btn-view-shifts" onclick="setCandidateFeedView('shifts')">
+                        <i class="fa-solid fa-calendar-days"></i> Skiftannonser
+                    </button>
+                    <button class="view-tab-btn" id="btn-view-restaurants" onclick="setCandidateFeedView('restaurants')">
+                        <i class="fa-solid fa-store"></i> Restauranger
+                    </button>
+                </div>
+
                 <div id="feedFilterContainer" class="filter-card" style="display: none;">
                     <div class="filter-row">
                         <select id="filterInterestSelect" class="filter-select" onchange="applyFeedFilters()">
@@ -629,7 +742,65 @@
                     <div id="view-profile-tags" class="view-tags-group"></div>
                 </div>
 
-                <button class="btn btn-secondary" onclick="openProfileEditor()"><i class="fa-solid fa-pen-to-square"></i> Redigera Profil</button>
+                <!-- Formulär för att Lägga upp Skiftannons (Enbart för restauranger) -->
+                <div id="restaurant-shift-publisher" class="profile-card" style="display: none; margin-top: 16px; border-color: var(--primary);">
+                    <h3 style="margin-top: 0; color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-bullhorn"></i> Publicera Skiftannons
+                    </h3>
+                    <form onsubmit="handlePostShiftAd(event)">
+                        <div class="form-group">
+                            <label class="form-label">Sökt Roll</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-user-tag"></i>
+                                <select id="shift-role" class="form-select" required>
+                                    <option value="">Välj roll...</option>
+                                    <option value="Diskare">Diskare</option>
+                                    <option value="Kock">Kock</option>
+                                    <option value="Servitris / Servitör">Servitris / Servitör</option>
+                                    <option value="Bartender">Bartender</option>
+                                    <option value="Hovmästare">Hovmästare</option>
+                                    <option value="Extra vid behov">Extra vid behov</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Datum</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-calendar"></i>
+                                <input type="date" id="shift-date" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Arbetstider</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-clock"></i>
+                                <input type="text" id="shift-hours" class="form-input" placeholder="T.ex. 16:00 - 23:00" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Erbjuden Timlön (kr/h)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-coins"></i>
+                                <input type="number" id="shift-wage" class="form-input" placeholder="T.ex. 165" min="50" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-post-shift" class="btn btn-primary" style="margin-top: 10px;">
+                            <i class="fa-solid fa-paper-plane"></i> Publicera Annons
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista med mina publicerade annonser -->
+                <div id="my-shifts-container" style="display: none; margin-top: 16px;">
+                    <p style="font-size: 0.85rem; font-weight: 800; color: var(--primary); text-transform: uppercase;">Mina Aktiva Skiftannonser</p>
+                    <div id="myShiftsList">Laddar annonser...</div>
+                </div>
+
+                <button class="btn btn-secondary" style="margin-top: 14px;" onclick="openProfileEditor()"><i class="fa-solid fa-pen-to-square"></i> Redigera Profil</button>
                 <button class="btn btn-outline" style="margin-top: 10px; color: #EF4444;" onclick="handleFirebaseLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logga ut</button>
             </div>
         </div>
@@ -678,7 +849,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, arrayUnion, arrayRemove, addDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBewQCcVn-pkR1Gw9hAs7BocAmcFP1xy-o",
@@ -697,16 +868,17 @@
     let currentRole = 'candidate';
     let currentUserData = null;
     let selectedTags = [];
-    let regSelectedTags = []; // För taggar i registreringsformuläret
+    let regSelectedTags = [];
     let allUsers = [];
     let feedItems = [];
+    let shiftAdsList = [];
+    let candidateFeedMode = 'shifts'; // 'shifts' eller 'restaurants'
     let currentSwipeIndex = 0;
     let pendingDeleteId = null;
 
     const CANDIDATE_TAGS = ['Kock', 'Servitris / Servitör', 'Bartender', 'Diskare', 'Hovmästare', 'Extra vid behov'];
     const RESTAURANT_TAGS = ['Söker Kock', 'Söker Servering', 'Söker Disk', 'Söker Hovmästare', 'Söker "Extra vid behov"'];
 
-    // Uppdatera text i anpassade filuppladdningsknappar
     window.updateFileName = (input, labelId) => {
         const labelSpan = document.getElementById(labelId);
         if (input.files && input.files.length > 0) {
@@ -716,7 +888,6 @@
         }
     };
 
-    // Base64 konvertering
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -726,7 +897,6 @@
         });
     }
 
-    // Automatisk bild-komprimering med Canvas
     function compressImage(file, maxWidth = 800, quality = 0.75) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -759,7 +929,6 @@
         });
     }
 
-    // Toast Notifikationer
     window.showToast = (message, type = 'info') => {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -784,7 +953,6 @@
         document.getElementById('role-candidate-btn').classList.toggle('selected', role === 'candidate');
         document.getElementById('role-restaurant-btn').classList.toggle('selected', role === 'restaurant');
 
-        // Hantera registreringsformulärets fält baserat på roll
         const restFields = document.getElementById('reg-restaurant-fields');
         const regSubtitle = document.getElementById('reg-subtitle');
         const submitBtn = document.getElementById('btn-register-submit');
@@ -854,7 +1022,6 @@
                 if (docSnap.exists()) {
                     currentUserData = { id: user.uid, ...docSnap.data() };
 
-                    // Kontrollera om restaurangkontot är godkänt
                     if (currentUserData.role === 'restaurant' && !currentUserData.approved) {
                         goToScreen('screen-pending-approval');
                         return;
@@ -888,12 +1055,11 @@
             const initialData = {
                 email: email,
                 role: currentRole,
-                approved: !isRestaurant, // false för restaurang, true för kandidat
+                approved: !isRestaurant,
                 favorites: [],
                 createdAt: new Date().toISOString()
             };
 
-            // Spara samtliga restauranguppgifter vid registreringen
             if (isRestaurant) {
                 initialData.name = document.getElementById('reg-rest-name').value.trim();
                 initialData.orgNo = document.getElementById('reg-orgno').value.trim();
@@ -1062,7 +1228,6 @@
         };
 
         try {
-            // Profilbild för både kandidat och restaurang
             const avatarFileInput = document.getElementById('prof-avatar-file');
             if (avatarFileInput && avatarFileInput.files.length > 0) {
                 const avatarFile = avatarFileInput.files[0];
@@ -1156,6 +1321,9 @@
         const cvSec = document.getElementById('view-profile-cv-section');
         const cvContainer = document.getElementById('view-profile-cv-container');
 
+        const shiftPublisher = document.getElementById('restaurant-shift-publisher');
+        const myShiftsSec = document.getElementById('my-shifts-container');
+
         if (isCandidate) {
             contactEl.style.display = 'none';
             expEl.style.display = 'flex';
@@ -1177,6 +1345,9 @@
             } else {
                 cvContainer.innerHTML = `<span style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-file-excel" style="color:var(--text-light);"></i> Inget CV uppladdat</span>`;
             }
+
+            shiftPublisher.style.display = 'none';
+            myShiftsSec.style.display = 'none';
         } else {
             expEl.style.display = 'none';
             pastJobsSec.style.display = 'none';
@@ -1188,6 +1359,10 @@
             } else {
                 contactEl.style.display = 'none';
             }
+
+            shiftPublisher.style.display = 'block';
+            myShiftsSec.style.display = 'block';
+            loadMyShiftAds();
         }
 
         const tagsContainer = document.getElementById('view-profile-tags');
@@ -1204,24 +1379,140 @@
         }
     }
 
+    /* Publicera Skiftannons för Restauranger */
+    window.handlePostShiftAd = async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user || currentUserData?.role !== 'restaurant') return;
+
+        const role = document.getElementById('shift-role').value;
+        const date = document.getElementById('shift-date').value;
+        const hours = document.getElementById('shift-hours').value.trim();
+        const wage = document.getElementById('shift-wage').value;
+
+        const postBtn = document.getElementById('btn-post-shift');
+        postBtn.disabled = true;
+
+        try {
+            await addDoc(collection(db, "shift_ads"), {
+                restaurantId: user.uid,
+                restaurantName: currentUserData.name || 'Restaurang',
+                location: currentUserData.location || '',
+                phone: currentUserData.phone || '',
+                role: role,
+                date: date,
+                hours: hours,
+                hourlyWage: wage,
+                createdAt: new Date().toISOString()
+            });
+
+            showToast("Skiftannons publicerad!", "success");
+            document.getElementById('shift-role').value = '';
+            document.getElementById('shift-date').value = '';
+            document.getElementById('shift-hours').value = '';
+            document.getElementById('shift-wage').value = '';
+
+            loadMyShiftAds();
+            if (currentUserData.role === 'candidate') loadFeedData();
+
+        } catch (err) {
+            console.error("Kunde inte publicera skiftannons:", err);
+            showToast("Misslyckades att publicera annons.", "error");
+        } finally {
+            postBtn.disabled = false;
+        }
+    };
+
+    /* Ladda och visa restaurangens egna skiftannonser */
+    async function loadMyShiftAds() {
+        const listContainer = document.getElementById('myShiftsList');
+        if (!listContainer || !auth.currentUser) return;
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "shift_ads"));
+            const myShifts = [];
+
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (data.restaurantId === auth.currentUser.uid) {
+                    myShifts.push({ id: docSnap.id, ...data });
+                }
+            });
+
+            if (myShifts.length === 0) {
+                listContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Du har inga aktiva skiftannonser.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            myShifts.forEach(shift => {
+                const card = document.createElement('div');
+                card.className = 'shift-card';
+                card.style.padding = '12px 14px';
+                card.style.marginBottom = '10px';
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; font-size:0.95rem; color:#F8FAFC;">${shift.role}</h4>
+                        <button onclick="deleteShiftAd('${shift.id}')" style="background:none; border:none; color:#EF4444; cursor:pointer;" title="Ta bort">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div style="font-size:0.8rem; color:#94A3B8; margin-top:6px; display:flex; gap:12px; flex-wrap:wrap;">
+                        <span><i class="fa-solid fa-calendar-day" style="color:#38BDF8;"></i> ${shift.date}</span>
+                        <span><i class="fa-solid fa-clock" style="color:#38BDF8;"></i> ${shift.hours}</span>
+                        <span style="color:#4ADE80; font-weight:700;"><i class="fa-solid fa-coins"></i> ${shift.hourlyWage} kr/h</span>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+        } catch (e) {
+            console.error("Fel vid hämtning av egna skift:", e);
+        }
+    }
+
+    window.deleteShiftAd = async (shiftId) => {
+        try {
+            await deleteDoc(doc(db, "shift_ads", shiftId));
+            showToast("Skiftannons borttagen.", "info");
+            loadMyShiftAds();
+        } catch (err) {
+            console.error("Kunde inte radera skift:", err);
+            showToast("Kunde inte ta bort annonsen.", "error");
+        }
+    };
+
+    window.setCandidateFeedView = (mode) => {
+        candidateFeedMode = mode;
+        document.getElementById('btn-view-shifts').classList.toggle('active', mode === 'shifts');
+        document.getElementById('btn-view-restaurants').classList.toggle('active', mode === 'restaurants');
+        applyFeedFilters();
+    };
+
     async function loadFeedData() {
         if (!currentUserData) return;
 
-        const targetRole = currentUserData.role === 'candidate' ? 'restaurant' : 'candidate';
         const feedContainer = document.getElementById('feedContent');
         const filterContainer = document.getElementById('feedFilterContainer');
-        
+        const toggleContainer = document.getElementById('candidateFeedToggle');
+
         feedContainer.innerHTML = '<p style="text-align:center; padding:20px;">Hämtar flöde...</p>';
 
         if (currentUserData.role === 'restaurant') {
             filterContainer.style.display = 'flex';
+            toggleContainer.style.display = 'none';
         } else {
             filterContainer.style.display = 'none';
+            toggleContainer.style.display = 'flex';
         }
 
         try {
+            // Hämtar användare
             const querySnapshot = await getDocs(collection(db, "users"));
             allUsers = [];
+
+            const targetRole = currentUserData.role === 'candidate' ? 'restaurant' : 'candidate';
 
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
@@ -1229,6 +1520,15 @@
                     allUsers.push({ id: docSnap.id, ...data });
                 }
             });
+
+            // Hämtar skiftannonser för kandidater
+            if (currentUserData.role === 'candidate') {
+                const shiftSnap = await getDocs(collection(db, "shift_ads"));
+                shiftAdsList = [];
+                shiftSnap.forEach((docSnap) => {
+                    shiftAdsList.push({ id: docSnap.id, ...docSnap.data() });
+                });
+            }
 
             applyFeedFilters();
             renderSavedList();
@@ -1241,6 +1541,18 @@
     window.applyFeedFilters = () => {
         if (!currentUserData) return;
 
+        const container = document.getElementById('feedContent');
+
+        if (currentUserData.role === 'candidate') {
+            if (candidateFeedMode === 'shifts') {
+                renderShiftsFeed();
+            } else {
+                renderCandidateRestaurantFeed();
+            }
+            return;
+        }
+
+        // Restaurangflöde (Svepa kandidater)
         const favorites = currentUserData.favorites || [];
         const passed = currentUserData.passed || {};
         const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -1251,50 +1563,119 @@
         items = items.filter(user => {
             const passedTimestamp = passed[user.id];
             if (!passedTimestamp) return true;
-            
             return (now - passedTimestamp) > SEVEN_DAYS_MS;
         });
 
-        if (currentUserData.role === 'restaurant') {
-            const interestFilter = document.getElementById('filterInterestSelect').value;
-            const roleFilter = document.getElementById('filterRoleSelect').value;
+        const interestFilter = document.getElementById('filterInterestSelect').value;
+        const roleFilter = document.getElementById('filterRoleSelect').value;
 
-            if (interestFilter === 'interested') {
-                items = items.filter(u => Array.isArray(u.favorites) && u.favorites.includes(auth.currentUser.uid));
-            }
+        if (interestFilter === 'interested') {
+            items = items.filter(u => Array.isArray(u.favorites) && u.favorites.includes(auth.currentUser.uid));
+        }
 
-            if (roleFilter !== 'all') {
-                items = items.filter(u => Array.isArray(u.tags) && u.tags.includes(roleFilter));
-            }
+        if (roleFilter !== 'all') {
+            items = items.filter(u => Array.isArray(u.tags) && u.tags.includes(roleFilter));
         }
 
         feedItems = items;
         currentSwipeIndex = 0;
 
-        const feedContainer = document.getElementById('feedContent');
         if (feedItems.length === 0) {
-            const targetRole = currentUserData.role === 'candidate' ? 'restauranger' : 'kandidater';
-            feedContainer.innerHTML = `
+            container.innerHTML = `
                 <div class="empty-feed">
                     <i class="fa-solid fa-users-slash"></i>
-                    <h3>Inga tillgängliga ${targetRole}</h3>
+                    <h3>Inga tillgängliga kandidater</h3>
                     <p>Inga profiler matchar dina nuvarande filterinställningar.</p>
                 </div>`;
             return;
         }
 
-        if (currentUserData.role === 'candidate') {
-            renderCandidateFeed();
-        } else {
-            renderRestaurantSwipeFeed();
-        }
+        renderRestaurantSwipeFeed();
     };
 
-    function renderCandidateFeed() {
+    /* Visa skiftannonser för kandidat */
+    function renderShiftsFeed() {
         const container = document.getElementById('feedContent');
         container.innerHTML = '';
 
-        feedItems.forEach(item => {
+        if (shiftAdsList.length === 0) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <h3>Inga lediga skift just nu</h3>
+                    <p>Restaurangerna har inte lagt upp några specifika skiftannonser för tillfället. Kolla fliken <b>Restauranger</b> för att utforska alla krogprofiler!</p>
+                </div>`;
+            return;
+        }
+
+        shiftAdsList.forEach(shift => {
+            const card = document.createElement('div');
+            card.className = 'shift-card';
+
+            card.innerHTML = `
+                <div class="shift-header">
+                    <div>
+                        <h3 class="shift-title">${shift.role}</h3>
+                        <div class="shift-restaurant"><i class="fa-solid fa-store"></i> ${shift.restaurantName || 'Restaurang'}</div>
+                    </div>
+                    <span class="shift-badge"><i class="fa-solid fa-bolt"></i> Extra jobbtillfälle</span>
+                </div>
+
+                <div class="shift-details-grid">
+                    <div class="shift-detail-item">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <span>Datum: <b>${shift.date}</b></span>
+                    </div>
+                    <div class="shift-detail-item">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Tid: <b>${shift.hours}</b></span>
+                    </div>
+                    <div class="shift-detail-item shift-wage-tag">
+                        <i class="fa-solid fa-coins"></i>
+                        <span>Timlön: ${shift.hourlyWage} kr/h</span>
+                    </div>
+                    ${shift.location ? `
+                        <div class="shift-detail-item" style="grid-column: span 2;">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Plats: ${shift.location}</span>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 14px;">
+                    ${shift.phone ? `
+                        <a href="tel:${shift.phone}" class="btn btn-primary" style="text-decoration:none; text-align:center; flex:1; font-size:0.85rem; padding:10px;">
+                            <i class="fa-solid fa-phone"></i> Ring & Ansök
+                        </a>
+                    ` : ''}
+                    <button class="btn btn-outline" style="flex:1; font-size:0.85rem; padding:10px;" onclick="openProfileModal('${shift.restaurantId}')">
+                        <i class="fa-solid fa-store"></i> Visa Restaurang
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    /* Visa restaurangprofiler för kandidat */
+    function renderCandidateRestaurantFeed() {
+        const container = document.getElementById('feedContent');
+        container.innerHTML = '';
+
+        const favorites = currentUserData.favorites || [];
+        const items = allUsers.filter(user => !favorites.includes(user.id));
+
+        if (items.length === 0) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-solid fa-store-slash"></i>
+                    <h3>Inga fler restauranger</h3>
+                    <p>Du har sparat alla tillgängliga restauranger i dina favoriter.</p>
+                </div>`;
+            return;
+        }
+
+        items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'feed-card-item';
 
