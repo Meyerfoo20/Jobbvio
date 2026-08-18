@@ -446,3 +446,418 @@
         .form-file-input-hidden {
             display: none !important;
         }
+        .custom-file-upload {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 18px;
+            background: var(--bg-app, #1E293B);
+            color: var(--text-main, #F8FAFC);
+            border: 1.5px dashed var(--border, #334155);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .custom-file-upload:hover {
+            border-color: var(--primary, #38BDF8);
+            background: rgba(56, 189, 248, 0.05);
+            color: var(--primary, #38BDF8);
+        }
+
+        .custom-file-upload i {
+            font-size: 1.1rem;
+        }
+
+        .form-file-input-hidden {
+            display: none !important;
+        }
+
+        /* Hero-bild för restaurangkort i flödet */
+        .restaurant-hero-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .restaurant-hero-placeholder {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #1E293B, #0F172A);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted, #94A3B8);
+            font-size: 2.5rem;
+            border: 1px solid var(--border, #334155);
+        }
+
+        /* Toggle för att växla mellan skift och restauranger */
+        .feed-view-toggle {
+            display: flex;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+
+        .view-tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            background: transparent;
+            color: #94A3B8;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .view-tab-btn.active {
+            background: var(--primary, #38BDF8);
+            color: #0F172A;
+        }
+
+        /* Kort för skiftannonser */
+        .shift-card {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .shift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .shift-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #F8FAFC;
+            margin: 0 0 4px 0;
+        }
+
+        .shift-restaurant {
+            font-size: 0.85rem;
+            color: #38BDF8;
+            font-weight: 600;
+        }
+
+        .shift-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38BDF8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .shift-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 14px 0;
+            background: #0F172A;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .shift-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #CBD5E1;
+        }
+
+        .shift-detail-item i {
+            color: #38BDF8;
+            width: 16px;
+        }
+
+        .shift-wage-tag {
+            grid-column: span 2;
+            font-weight: 800;
+            color: #4ADE80;
+        }
+
+        /* ==================== SIDOMENY / DRAWER CSS ==================== */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-main, #F8FAFC);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 290px;
+            height: 100%;
+            background: #0F172A;
+            border-right: 1px solid var(--border, #334155);
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 10px 0 25px rgba(0,0,0,0.5);
+        }
+
+        .side-drawer.active {
+            left: 0;
+        }
+
+        .drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1E293B;
+        }
+
+        .drawer-header img {
+            height: 28px;
+        }
+
+        .drawer-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted, #94A3B8);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .drawer-body {
+            padding: 20px;
+            color: var(--text-main, #F8FAFC);
+            flex: 1;
+        }
+
+        .drawer-section {
+            margin-bottom: 24px;
+        }
+
+        .drawer-section-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--primary, #38BDF8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drawer-text {
+            font-size: 0.88rem;
+            color: #94A3B8;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .install-steps {
+            background: #1E293B;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+        }
+
+        .install-steps h4 {
+            font-size: 0.9rem;
+            margin: 0 0 8px 0;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .install-steps ol {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 0.82rem;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .install-steps ol li {
+            margin-bottom: 4px;
+        }
+
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border, #334155);
+            font-size: 0.75rem;
+            color: var(--text-muted, #94A3B8);
+            text-align: center;
+        }
+
+        .shift-card {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 18px;
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .shift-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .shift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .shift-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.3px;
+        }
+
+        .shift-restaurant {
+            font-size: 0.88rem;
+            color: var(--primary, #38BDF8);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .shift-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .shift-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+            background: #0F172A;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .shift-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #94A3B8;
+        }
+
+        .shift-detail-item i {
+            color: var(--primary, #38BDF8);
+            width: 16px;
+            text-align: center;
+        }
+
+        .shift-wage-tag {
+            grid-column: span 2;
+            font-weight: 800;
+            color: #4ADE80;
+            background: rgba(74, 222, 128, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .interest-btn {
+            flex: 1;
+            background: var(--primary, #38BDF8);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .interest-btn.applied {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ADE80;
+            border: 1px solid #4ADE80;
+            cursor: default;
+        }
