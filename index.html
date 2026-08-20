@@ -64,6 +64,13 @@
     </style>
 </head>
 <body>
+<div id="splash-screen">
+    <div class="splash-content">
+        <img src="images/logo.png" alt="Jobbvio Logo" class="splash-logo">
+        <div class="splash-spinner"></div>
+    </div>
+</div>
+
 
 <div class="app-shell">
 
@@ -830,7 +837,14 @@ window.goToScreen = (screenId) => {
     document.getElementById(screenId).classList.add('active');
 };
 
-// Autentisering & Firebase lyssnare
+function hideSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(() => splash.remove(), 500);
+    }
+}
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         try {
@@ -856,6 +870,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         goToScreen('screen-welcome');
     }
+    hideSplashScreen();
 });
 
 window.handleFirebaseRegister = async (e) => {
@@ -2225,6 +2240,8 @@ window.switchTab = (el, tabId) => {
         loadChatList();
     }
 };
+
+
 </script>
 
 <script>
