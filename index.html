@@ -395,7 +395,7 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
             
-            <div class="app-logo"><img src="images/logo.png" alt="Jobbvio Logo"></div>
+            <div class="app-logo"><h2 style="color: #F59E0B;">Jobb<span style="color: #0F172A;">Vio</span></h2></div>
             
             <div class="user-badge" id="appUserBadge">
                 <i class="fa-solid fa-circle-user"></i> <span id="appRoleLabel">Användare</span>
@@ -442,9 +442,18 @@
                 <div id="savedListContent">Laddar sparade...</div>
             </div>
 
-            <!-- CHATT-FLIK -->
+            <!-- CHATT-FLIK MED SÖKFÄLT -->
             <div id="tab-chat" class="card-container" style="display: none;">
                 <h3 style="margin-top: 0; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-comments" style="color:var(--primary);"></i> Meddelanden</h3>
+                
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="chatSearchInput" class="form-input" placeholder="Sök..." oninput="handleChatSearch(this.value)">
+                    </div>
+                </div>
+
+                <div id="chatSearchResults" style="display: none; margin-bottom: 16px;"></div>
                 <div id="chatListContent">Laddar meddelanden...</div>
             </div>
 
@@ -1871,7 +1880,7 @@ function renderSavedList() {
                     <button class="btn btn-primary" style="font-size:0.8rem; padding:8px 12px; flex:1;" onclick="event.stopPropagation(); openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
                         <i class="fa-solid fa-comments"></i> Chatt
                     </button>
-                    <button class="btn btn-outline" style="font-size:0.8rem; padding:8px 12px; flex:1; color:#FFF;" onclick="openProfileModal('${item.id}')">
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:8px 12px; flex:1; color:#F59E0B;" onclick="openProfileModal('${item.id}')">
                         Profil <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
@@ -1881,7 +1890,61 @@ function renderSavedList() {
     });
 }
 
-// ---------------- CHATT-LOGIK ---------------- //
+
+window.handleChatSearch = (query) => {
+    const resultsContainer = document.getElementById('chatSearchResults');
+    const listContainer = document.getElementById('chatListContent');
+    const term = query.trim().toLowerCase();
+
+    if (!term) {
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        listContainer.style.display = 'block';
+        return;
+    }
+
+    resultsContainer.style.display = 'block';
+
+    const matches = allUsers.filter(u => {
+        const nameMatch = u.name && u.name.toLowerCase().includes(term);
+        const locationMatch = u.location && u.location.toLowerCase().includes(term);
+        const tagMatch = Array.isArray(u.tags) && u.tags.some(t => t.toLowerCase().includes(term));
+        return nameMatch || locationMatch || tagMatch;
+    });
+
+    if (matches.length === 0) {
+        const targetLabel = currentUserData?.role === 'restaurant' ? 'jobbsökande' : 'restauranger';
+        resultsContainer.innerHTML = `
+            <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 12px 0;">
+                Inga ${targetLabel} hittades för "${escapeHtml(query)}".
+            </p>`;
+        return;
+    }
+
+    let html = `<p style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 8px;">SÖKRESULTAT</p>`;
+    matches.forEach(user => {
+        const avatarHtml = user.avatarUrl
+            ? `<img src="${user.avatarUrl}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">`
+            : `<div class="avatar-placeholder" style="width:40px; height:40px; font-size:0.9rem;"><i class="fa-solid fa-${user.role === 'candidate' ? 'user' : 'store'}"></i></div>`;
+
+        const tagText = Array.isArray(user.tags) && user.tags.length > 0 ? user.tags.slice(0, 2).join(', ') : (user.location || '');
+
+        html += `
+            <div class="chat-item-card" onclick="openChatModal('${user.id}', '${escapeJs(user.name)}', '${escapeJs(user.avatarUrl || '')}')">
+                ${avatarHtml}
+                <div style="flex:1; overflow:hidden;">
+                    <h4 style="margin:0; font-size:0.95rem; color:#F8FAFC;">${escapeHtml(user.name)}</h4>
+                    <p style="margin:2px 0 0 0; font-size:0.8rem; color:#94A3B8;">${escapeHtml(tagText)}</p>
+                </div>
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem; width: auto; border-radius: 8px;">
+                    Chatta <i class="fa-solid fa-comment"></i>
+                </button>
+            </div>
+        `;
+    });
+
+    resultsContainer.innerHTML = html;
+};
 
 function loadChatList() {
     if (!auth.currentUser) return;
@@ -1899,7 +1962,7 @@ function loadChatList() {
                 <div class="empty-feed">
                     <i class="fa-regular fa-comments"></i>
                     <h3>Inga meddelanden än</h3>
-                    <p>När du kontaktar en krog eller kandidat visas era konversationer här.</p>
+                    <p>Använd sökfältet ovan eller utforska flödet för att starta en chatt!</p>
                 </div>`;
             return;
         }
@@ -2152,7 +2215,15 @@ window.switchTab = (el, tabId) => {
     document.getElementById('tab-profile').style.display = tabId === 'tab-profile' ? 'flex' : 'none';
 
     if (tabId === 'tab-saved') renderSavedList();
-    if (tabId === 'tab-chat') loadChatList();
+    if (tabId === 'tab-chat') {
+        const searchInput = document.getElementById('chatSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.placeholder = currentUserData?.role === 'restaurant' ? 'Sök jobbsökande...' : 'Sök restauranger...';
+            window.handleChatSearch('');
+        }
+        loadChatList();
+    }
 };
 </script>
 
