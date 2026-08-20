@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jobbvio-v19';
+const CACHE_NAME = 'jobbvio-v20';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
