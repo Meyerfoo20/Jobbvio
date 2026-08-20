@@ -15,7 +15,53 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <style>
+        /* Chatt - Anpassade stilar */
+        .chat-bubble {
+            max-width: 78%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-break: break-word;
+            position: relative;
+        }
+        .chat-bubble.sent {
+            align-self: flex-end;
+            background: #0284C7;
+            color: #FFFFFF;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble.received {
+            align-self: flex-start;
+            background: #334155;
+            color: #F8FAFC;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-time {
+            font-size: 0.65rem;
+            opacity: 0.75;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .chat-item-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .chat-item-card:hover {
+            background: #334155;
+            border-color: #0284C7;
+        }
+    </style>
 </head>
 <body>
 
@@ -23,10 +69,8 @@
 
     <div id="toast-container"></div>
 
-    <!-- SIDOMENY / DRAWER OVERLAY -->
     <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
 
-    <!-- SIDOMENY / DRAWER -->
     <div id="side-drawer" class="side-drawer">
         <div class="drawer-header">
             <img src="images/logo.png" alt="Jobbvio Logo">
@@ -45,7 +89,6 @@
                 <div class="drawer-section-title"><i class="fa-solid fa-mobile-screen-button"></i> Ladda ned som Webbapp</div>
                 <p class="drawer-text"> Spara Jobbvio direkt på hemskärmen på din telefon för en snabbare app-upplevelse utan appbutiker!</p>
                 
-                <!-- iPhone instruktioner -->
                 <div class="install-steps">
                     <h4><i class="fa-brands fa-apple" style="font-size:1.1rem;"></i> iPhone (Safari)</h4>
                     <ol>
@@ -56,7 +99,6 @@
                     </ol>
                 </div>
 
-                <!-- Android instruktioner -->
                 <div class="install-steps">
                     <h4><i class="fa-brands fa-android" style="color: #4ADE80; font-size:1.1rem;"></i> Android (Chrome)</h4>
                     <ol>
@@ -349,7 +391,6 @@
 
     <div id="screen-app" class="screen">
         <div class="app-header">
-            <!-- HAMBURGER-KNAPP FÖR ATT ÖPPNA SIDOMENY -->
             <button class="menu-btn" onclick="openDrawer()" title="Öppna meny">
                 <i class="fa-solid fa-bars"></i>
             </button>
@@ -364,7 +405,6 @@
         <div class="app-main">
             <div id="tab-feed" class="card-container">
                 
-                <!-- Toggle för att växla vy för kandidat -->
                 <div id="candidateFeedToggle" class="feed-view-toggle" style="display: none;">
                     <button class="view-tab-btn active" id="btn-view-shifts" onclick="setCandidateFeedView('shifts')">
                         <i class="fa-solid fa-calendar-days"></i> Skiftannonser
@@ -402,6 +442,12 @@
                 <div id="savedListContent">Laddar sparade...</div>
             </div>
 
+            <!-- CHATT-FLIK -->
+            <div id="tab-chat" class="card-container" style="display: none;">
+                <h3 style="margin-top: 0; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-comments" style="color:var(--primary);"></i> Meddelanden</h3>
+                <div id="chatListContent">Laddar meddelanden...</div>
+            </div>
+
             <div id="tab-profile" class="card-container" style="display: none;">
                 <div class="profile-card">
                     <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
@@ -435,7 +481,6 @@
                     <div id="view-profile-tags" class="view-tags-group"></div>
                 </div>
 
-                <!-- Formulär för att Lägga upp Skiftannons (Enbart för restauranger) -->
                 <div id="restaurant-shift-publisher" class="profile-card" style="display: none; margin-top: 16px; border-color: var(--primary);">
                     <h3 style="margin-top: 0; color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-bullhorn"></i> Publicera Skiftannons
@@ -500,10 +545,12 @@
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchTab(this, 'tab-feed')"><i class="fa-solid fa-compass"></i>Utforska</div>
             <div class="nav-item" onclick="switchTab(this, 'tab-saved')"><i class="fa-solid fa-bookmark"></i>Sparade</div>
+            <div class="nav-item" onclick="switchTab(this, 'tab-chat')"><i class="fa-solid fa-comments"></i>Chatt</div>
             <div class="nav-item" onclick="switchTab(this, 'tab-profile')"><i class="fa-solid fa-user"></i>Min Profil</div>
         </nav>
     </div>
 
+    <!-- PROFILMODAL -->
     <div id="profileModal" class="modal-backdrop">
         <div class="modal-content">
             <button class="modal-close-btn" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -511,6 +558,34 @@
         </div>
     </div>
 
+    <!-- CHATTMODAL -->
+    <div id="chatModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 500px; height: 80vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 16px;">
+            <div style="padding: 14px 16px; background: #1E293B; border-bottom: 1px solid var(--border, #334155); display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="chat-header-avatar"></div>
+                    <div>
+                        <h4 id="chat-header-name" style="margin: 0; font-size: 1rem; color: #F8FAFC;">Chatt</h4>
+                        <span id="chat-header-sub" style="font-size: 0.75rem; color: #94A3B8;">Aktiv konversation</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="closeChatModal()" style="position: static; font-size: 1.2rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="chatMessages" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0F172A;">
+                <!-- Chattmeddelanden laddas här -->
+            </div>
+
+            <form id="chatForm" onsubmit="handleSendChatMessage(event)" style="padding: 12px; background: #1E293B; border-top: 1px solid var(--border, #334155); display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="chatInput" class="form-input" placeholder="Skriv ett meddelande..." autocomplete="off" required style="flex: 1; margin: 0;">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 16px; width: auto; border-radius: 10px;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BEKRÄFTELSEMODAL -->
     <div id="confirmModal" class="modal-backdrop">
         <div class="modal-content confirm-box">
             <i class="fa-solid fa-triangle-exclamation"></i>
@@ -557,7 +632,11 @@ import {
     addDoc, 
     deleteDoc, 
     arrayUnion, 
-    arrayRemove 
+    arrayRemove,
+    query,
+    where,
+    orderBy,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -585,8 +664,27 @@ let candidateFeedMode = 'shifts';
 let currentSwipeIndex = 0;
 let pendingDeleteId = null;
 
+// Chattvariabler
+let activeChatUnsubscribe = null;
+let activeChatId = null;
+let activeChatPartner = null;
+
 const CANDIDATE_TAGS = ['Kock', 'Servitris / Servitör', 'Bartender', 'Diskare', 'Hovmästare', 'Extra vid behov'];
 const RESTAURANT_TAGS = ['Söker Kock', 'Söker Servering', 'Söker Disk', 'Söker Hovmästare', 'Söker "Extra vid behov"'];
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function escapeJs(str) {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function getChatId(uid1, uid2) {
+    return [uid1, uid2].sort().join('_');
+}
 
 window.updateFileName = (input, labelId) => {
     const labelSpan = document.getElementById(labelId);
@@ -1261,6 +1359,9 @@ window.showShiftApplicants = async (shiftId) => {
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
+                        <button onclick="event.stopPropagation(); openChatModal('${candidate.id}', '${escapeJs(candidate.name)}', '${escapeJs(candidate.avatarUrl || '')}')" style="background:none; border:none; color:#38BDF8; font-size:1rem; cursor:pointer; padding:4px;" title="Chatta">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </button>
                         <button onclick="event.stopPropagation(); toggleFavorite('${candidate.id}')" style="background:none; border:none; color:${isFav ? '#EF4444' : '#64748B'}; font-size:0.9rem; cursor:pointer;" title="${isFav ? 'Sparad i favoriter' : 'Spara till favoriter'}">
                             <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
                         </button>
@@ -1473,13 +1574,16 @@ function renderShiftsFeed() {
                 ` : ''}
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 14px;">
-                <button class="interest-btn ${isInterested ? 'applied' : ''}" onclick="toggleShiftInterest('${shift.id}')">
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="interest-btn ${isInterested ? 'applied' : ''}" style="flex:2;" onclick="toggleShiftInterest('${shift.id}')">
                     <i class="fa-solid ${isInterested ? 'fa-circle-check' : 'fa-heart'}"></i>
-                    ${isInterested ? 'Intresse anmält' : 'Visa intresse'}
+                    ${isInterested ? 'Anmält' : 'Sök'}
                 </button>
-                <button class="btn btn-outline" style="flex:1; font-size:0.88rem; color: #fff; padding:12px; border-radius:12px;" onclick="openProfileModal('${shift.restaurantId}')">
-                    <i class="fa-solid fa-store"></i> Profil
+                <button class="btn btn-primary" style="flex:1.5; font-size:0.85rem; padding:10px; border-radius:10px;" onclick="openChatModal('${shift.restaurantId}', '${escapeJs(shift.restaurantName || 'Restaurang')}', '')">
+                    <i class="fa-solid fa-comments"></i> Chatt
+                </button>
+                <button class="btn btn-outline" style="flex:1; font-size:0.85rem; color: #fff; padding:10px; border-radius:10px;" onclick="openProfileModal('${shift.restaurantId}')">
+                    <i class="fa-solid fa-store"></i>
                 </button>
             </div>
         `;
@@ -1531,6 +1635,10 @@ function renderCandidateRestaurantFeed() {
             <div class="view-tags-group">
                 ${(item.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.75rem; color:var(--text-muted);">Inga</span>'}
             </div>
+
+            <button class="btn btn-primary" style="margin-top:14px; font-size:0.88rem;" onclick="openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
+                <i class="fa-solid fa-comments"></i> Skicka meddelande
+            </button>
         `;
         container.appendChild(card);
     });
@@ -1589,6 +1697,10 @@ function renderRestaurantSwipeFeed() {
                     <div class="view-tags-group">
                         ${(item.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.75rem; color:var(--text-muted);">Inga</span>'}
                     </div>
+
+                    <button class="btn btn-outline" style="margin-top:12px; border-color:var(--primary); color:var(--primary-hover); font-size:0.85rem;" onclick="openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
+                        <i class="fa-solid fa-comments"></i> Skicka meddelande
+                    </button>
                 </div>
 
                 <div class="swipe-actions">
@@ -1727,13 +1839,12 @@ function renderSavedList() {
     savedItems.forEach(item => {
         const card = document.createElement('div');
         card.className = 'profile-card';
-        card.style.cursor = 'pointer';
 
         card.innerHTML = `
             <button class="like-icon-btn liked" title="Ta bort från sparade" onclick="event.stopPropagation(); requestDeleteFavorite('${item.id}', '${item.name}');">
                 <i class="fa-solid fa-trash-can"></i>
             </button>
-            <div onclick="openProfileModal('${item.id}')">
+            <div>
                 ${item.role === 'restaurant' && item.avatarUrl 
                     ? `<img src="${item.avatarUrl}" alt="${item.name}" class="restaurant-hero-img" style="height:120px;">`
                     : ''
@@ -1756,14 +1867,202 @@ function renderSavedList() {
                 ${item.experience ? `<p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience}</p>` : ''}
                 ${item.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontakt: ${item.contactPerson}</p>` : ''}
                 
-                <div style="margin-top:10px; font-size:0.8rem; font-weight:700; color:var(--primary-hover); display:flex; align-items:center; gap:6px;">
-                    Visa hel profil <i class="fa-solid fa-arrow-right"></i>
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button class="btn btn-primary" style="font-size:0.8rem; padding:8px 12px; flex:1;" onclick="event.stopPropagation(); openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
+                        <i class="fa-solid fa-comments"></i> Chatt
+                    </button>
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:8px 12px; flex:1; color:#FFF;" onclick="openProfileModal('${item.id}')">
+                        Profil <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         `;
         container.appendChild(card);
     });
 }
+
+// ---------------- CHATT-LOGIK ---------------- //
+
+function loadChatList() {
+    if (!auth.currentUser) return;
+    const container = document.getElementById('chatListContent');
+    container.innerHTML = '<p style="text-align:center; padding:20px;">Laddar chattar...</p>';
+
+    const q = query(
+        collection(db, "chats"),
+        where("participants", "array-contains", auth.currentUser.uid)
+    );
+
+    onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fa-regular fa-comments"></i>
+                    <h3>Inga meddelanden än</h3>
+                    <p>När du kontaktar en krog eller kandidat visas era konversationer här.</p>
+                </div>`;
+            return;
+        }
+
+        const chats = [];
+        snapshot.forEach((docSnap) => {
+            chats.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        chats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+        container.innerHTML = '';
+        chats.forEach(chat => {
+            const partnerId = chat.participants.find(id => id !== auth.currentUser.uid);
+            const partnerName = chat.participantNames?.[partnerId] || 'Användare';
+            const partnerAvatar = chat.participantAvatars?.[partnerId] || '';
+
+            let dateStr = '';
+            if (chat.updatedAt) {
+                const date = new Date(chat.updatedAt);
+                dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            }
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'chat-item-card';
+            itemEl.onclick = () => openChatModal(partnerId, partnerName, partnerAvatar);
+
+            itemEl.innerHTML = `
+                ${partnerAvatar 
+                    ? `<img src="${partnerAvatar}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">`
+                    : `<div class="avatar-placeholder" style="width:48px; height:48px; font-size:1.1rem;"><i class="fa-solid fa-user"></i></div>`
+                }
+                <div style="flex:1; overflow:hidden;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; font-size:0.95rem; color:#F8FAFC;">${escapeHtml(partnerName)}</h4>
+                        <span style="font-size:0.75rem; color:#64748B;">${dateStr}</span>
+                    </div>
+                    <p style="margin:4px 0 0 0; font-size:0.82rem; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${chat.lastSenderId === auth.currentUser.uid ? '<strong>Du:</strong> ' : ''}${escapeHtml(chat.lastMessage || '')}
+                    </p>
+                </div>
+            `;
+            container.appendChild(itemEl);
+        });
+    }, (err) => {
+        console.error("Fel vid hämtning av chattlista:", err);
+        container.innerHTML = '<p style="color:var(--accent-red); text-align:center;">Kunde inte ladda chattar.</p>';
+    });
+}
+
+window.openChatModal = (targetUserId, targetUserName, targetUserAvatar) => {
+    if (!auth.currentUser) return;
+    
+    closeProfileModal();
+
+    activeChatPartner = {
+        id: targetUserId,
+        name: targetUserName,
+        avatar: targetUserAvatar
+    };
+    activeChatId = getChatId(auth.currentUser.uid, targetUserId);
+
+    document.getElementById('chat-header-name').innerText = targetUserName || 'Chatt';
+    const avatarHeader = document.getElementById('chat-header-avatar');
+    if (targetUserAvatar) {
+        avatarHeader.innerHTML = `<img src="${targetUserAvatar}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">`;
+    } else {
+        avatarHeader.innerHTML = `<div class="avatar-placeholder" style="width:36px; height:36px; font-size:0.9rem;"><i class="fa-solid fa-user"></i></div>`;
+    }
+
+    const modal = document.getElementById('chatModal');
+    modal.classList.add('active');
+
+    if (activeChatUnsubscribe) {
+        activeChatUnsubscribe();
+    }
+
+    const messagesContainer = document.getElementById('chatMessages');
+    messagesContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:0.85rem;">Hämtar meddelanden...</p>';
+
+    const q = query(
+        collection(db, "chats", activeChatId, "messages"),
+        orderBy("createdAt", "asc")
+    );
+
+    activeChatUnsubscribe = onSnapshot(q, (snapshot) => {
+        messagesContainer.innerHTML = '';
+        if (snapshot.empty) {
+            messagesContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:0.85rem;">Inga meddelanden än. Skriv något för att starta konversationen!</p>`;
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+            const msg = docSnap.data();
+            const isMe = msg.senderId === auth.currentUser.uid;
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${isMe ? 'sent' : 'received'}`;
+            
+            let timeStr = '';
+            if (msg.createdAt) {
+                const date = new Date(msg.createdAt);
+                timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            bubble.innerHTML = `
+                <div>${escapeHtml(msg.text)}</div>
+                <div class="chat-time">${timeStr}</div>
+            `;
+            messagesContainer.appendChild(bubble);
+        });
+
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, (error) => {
+        console.error("Fel vid chatt-lyssnare:", error);
+        messagesContainer.innerHTML = '<p style="color:var(--accent-red); text-align:center;">Kunde inte ladda meddelanden.</p>';
+    });
+};
+
+window.closeChatModal = () => {
+    if (activeChatUnsubscribe) {
+        activeChatUnsubscribe();
+        activeChatUnsubscribe = null;
+    }
+    activeChatId = null;
+    activeChatPartner = null;
+    document.getElementById('chatModal').classList.remove('active');
+};
+
+window.handleSendChatMessage = async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !activeChatId || !auth.currentUser || !activeChatPartner) return;
+
+    input.value = '';
+
+    try {
+        await addDoc(collection(db, "chats", activeChatId, "messages"), {
+            senderId: auth.currentUser.uid,
+            text: text,
+            createdAt: new Date().toISOString()
+        });
+
+        await setDoc(doc(db, "chats", activeChatId), {
+            participants: [auth.currentUser.uid, activeChatPartner.id],
+            participantNames: {
+                [auth.currentUser.uid]: currentUserData.name || 'Användare',
+                [activeChatPartner.id]: activeChatPartner.name || 'Användare'
+            },
+            participantAvatars: {
+                [auth.currentUser.uid]: currentUserData.avatarUrl || '',
+                [activeChatPartner.id]: activeChatPartner.avatar || ''
+            },
+            lastMessage: text,
+            lastSenderId: auth.currentUser.uid,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+    } catch (err) {
+        console.error("Kunde inte skicka meddelande:", err);
+        showToast("Kunde inte skicka meddelande.", "error");
+    }
+};
 
 window.openProfileModal = (userId) => {
     const user = allUsers.find(u => u.id === userId);
@@ -1828,7 +2127,11 @@ window.openProfileModal = (userId) => {
             ${(user.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.8rem; color:var(--text-muted);">Inga angivna</span>'}
         </div>
 
-        <button class="btn btn-outline" style="margin-top:20px; color:var(--accent-red); border-color:var(--accent-red);" onclick="requestDeleteFavorite('${user.id}', '${user.name}');">
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="openChatModal('${user.id}', '${escapeJs(user.name)}', '${escapeJs(user.avatarUrl || '')}')">
+            <i class="fa-solid fa-comments"></i> Skicka meddelande
+        </button>
+
+        <button class="btn btn-outline" style="margin-top:10px; color:var(--accent-red); border-color:var(--accent-red);" onclick="requestDeleteFavorite('${user.id}', '${user.name}');">
             <i class="fa-solid fa-trash-can"></i> Ta bort från Sparade
         </button>
     `;
@@ -1845,9 +2148,11 @@ window.switchTab = (el, tabId) => {
     el.classList.add('active');
     document.getElementById('tab-feed').style.display = tabId === 'tab-feed' ? 'flex' : 'none';
     document.getElementById('tab-saved').style.display = tabId === 'tab-saved' ? 'flex' : 'none';
+    document.getElementById('tab-chat').style.display = tabId === 'tab-chat' ? 'flex' : 'none';
     document.getElementById('tab-profile').style.display = tabId === 'tab-profile' ? 'flex' : 'none';
 
     if (tabId === 'tab-saved') renderSavedList();
+    if (tabId === 'tab-chat') loadChatList();
 };
 </script>
 
