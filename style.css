@@ -152,7 +152,7 @@
         .auth-switch-link a { color: var(--primary-hover); font-weight: 700; text-decoration: none; }
 
         .app-header { padding: 10px 16px; background: var(--card-bg); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .app-logo img { height: 52px; object-fit: contain; border-radius: 50%; border: solid #F59E0B 1px; }
+        .app-logo img { height: 52px; object-fit: contain; }
         .user-badge { display: flex; align-items: center; gap: 6px; background: var(--bg-app); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: var(--secondary); border: 1px solid var(--border); }
 
         .app-main { flex: 1; padding: 14px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
