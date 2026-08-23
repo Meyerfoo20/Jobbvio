@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jobbvio-v22';
+const CACHE_NAME = 'jobbvio-v23';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,7 +6,6 @@ const ASSETS_TO_CACHE = [
   './images/logo.png'
 ];
 
-// Installera Service Worker och cacha resurser
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {

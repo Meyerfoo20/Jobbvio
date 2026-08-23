@@ -259,6 +259,9 @@
                         <input type="password" class="form-input" id="login-password" required>
                     </div>
                 </div>
+                <div class="auth-switch-link" style="margin-top: 10px;">
+                    <a href="#" onclick="handleForgotPassword()">Glömt lösenord?</a>
+                </div>
                 <button type="submit" class="btn btn-secondary" style="margin-top: 16px;">Logga in <i class="fa-solid fa-right-to-bracket"></i></button>
             </form>
             <div class="auth-switch-link">Har du inget konto? <a href="#" onclick="goToScreen('screen-welcome')">Skapa konto</a></div>
@@ -632,7 +635,8 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     signOut, 
-    onAuthStateChanged 
+    onAuthStateChanged,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
     getFirestore, 
@@ -924,6 +928,23 @@ window.handleFirebaseLogin = async (e) => {
         showToast("Välkommen tillbaka!", "success");
     } catch (error) {
         showToast("Inloggning misslyckades. Kontrollera uppgifterna.", "error");
+    }
+};
+
+window.handleForgotPassword = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    
+    if (!email) {
+        showToast("Fyll i din e-postadress i fältet ovan först.", "error");
+        return;
+    }
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showToast("Återställningslänk har skickats till din e-post!", "success");
+    } catch (error) {
+        console.error("Fel vid återställning av lösenord:", error);
+        showToast("Kunde inte skicka mejl: " + error.message, "error");
     }
 };
 
