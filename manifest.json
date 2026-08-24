@@ -3,13 +3,13 @@
     "name": "Jobbvio",
     "icons": [
       {
-        "src": "images/logo.png",
+        "src": "images/logo-webb.png",
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "any maskable"
       },
       {
-        "src": "images/logo.png",
+        "src": "images/logo-webb.png",
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "any maskable"
