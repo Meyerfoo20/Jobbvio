@@ -11,6 +11,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Jobbvio">
     <link rel="apple-touch-icon" href="images/logo-webb.png">
+    <script>
+        (function() {
+            var isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            var isDesktopScreen = window.innerWidth >= 880;
+
+            if (isDesktopScreen && !isMobileUA) {
+                window.location.href = "info.html";
+            }
+        })();
+    </script>
 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -627,6 +637,7 @@
         document.getElementById('drawer-overlay').classList.remove('active');
     };
 </script>
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";

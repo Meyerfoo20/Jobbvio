@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jobbvio-v25';
+const CACHE_NAME = 'jobbvio-v26';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,7 +15,6 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// Aktivera och rensa gammal cache
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -31,7 +30,6 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Hämta filer med Network First / Cache Fallback
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
