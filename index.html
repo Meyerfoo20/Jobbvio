@@ -712,7 +712,7 @@
 
                 <div class="feed-view-toggle" style="margin-bottom: 14px;">
                     <button class="view-tab-btn active" id="btn-passes-upcoming" onclick="setPassesSubTab('upcoming')">
-                        <i class="fa-solid fa-calendar-days"></i> Kommande pass (<span id="count-upcoming-passes">0</span>)
+                        <i class="fa-solid fa-calendar-days"></i> Pass (<span id="count-upcoming-passes">0</span>)
                     </button>
                     <button class="view-tab-btn" id="btn-passes-offers" onclick="setPassesSubTab('offers')">
                         <i class="fa-solid fa-envelope-open-text"></i> Förfrågningar (<span id="count-pending-offers">0</span>)
@@ -1972,8 +1972,14 @@ function loadCandidatePasses() {
             candidatePassesList.push({ id: docSnap.id, ...docSnap.data() });
         });
 
-        const pendingOffers = candidatePassesList.filter(p => p.status === 'pending');
-        const acceptedPasses = candidatePassesList.filter(p => p.status === 'accepted');
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        // Erbjudanden som fortfarande är aktuella (idag eller framåt)
+        const pendingOffers = candidatePassesList.filter(p => p.status === 'pending' && (!p.date || p.date >= todayStr));
+        
+        // Kommande pass: endast idag eller framtida datum (försvinner dagen efter passet varit)
+        const acceptedPasses = candidatePassesList.filter(p => p.status === 'accepted' && (!p.date || p.date >= todayStr));
 
         // Sortera kommande pass efter det passet som kommer snarast!
         acceptedPasses.sort((a, b) => {

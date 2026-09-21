@@ -17,4 +17,4 @@ const firebaseConfig = {
                 window.location.href = "info.html";
             }
         })();
-    </script>
+</script>
