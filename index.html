@@ -11,23 +11,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Jobbvio">
     <link rel="apple-touch-icon" href="images/logo-webb.png">
-    <script>
-        (function() {
-            var isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            var isDesktopScreen = window.innerWidth >= 880;
-
-            if (isDesktopScreen && !isMobileUA) {
-                window.location.href = "info.html";
-            }
-        })();
-    </script>
 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Chatt - Anpassade stilar */
         .chat-bubble {
             max-width: 78%;
             padding: 10px 14px;
@@ -71,13 +60,135 @@
             background: #334155;
             border-color: #0284C7;
         }
+
+        /* TILLGÄNGLIGHETSKALENDER STILER */
+        .calendar-wrapper {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .calendar-month-title {
+            font-weight: 700;
+            color: #F8FAFC;
+            font-size: 1rem;
+            text-transform: capitalize;
+        }
+        .calendar-nav-btn {
+            background: #334155;
+            border: none;
+            color: #F8FAFC;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .calendar-nav-btn:hover {
+            background: #F59E0B;
+            color: #0F172A;
+        }
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94A3B8;
+            margin-bottom: 8px;
+        }
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #F8FAFC;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .calendar-day:hover:not(.empty):not(.read-only) {
+            border-color: #F59E0B;
+            transform: translateY(-1px);
+        }
+        .calendar-day.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+        .calendar-day.today {
+            border: 2px solid #F59E0B;
+        }
+        .calendar-day.unavailable {
+            background: rgba(239, 68, 68, 0.25);
+            border: 1.5px solid #EF4444;
+            color: #EF4444;
+            font-weight: 800;
+        }
+        .calendar-day.unavailable::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: #EF4444;
+            border-radius: 50%;
+        }
+        .calendar-day.read-only {
+            cursor: default;
+        }
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: #94A3B8;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .legend-color.available {
+            background: #0F172A;
+            border: 1px solid #334155;
+        }
+        .legend-color.unavailable {
+            background: #EF4444;
+        }
     </style>
 </head>
 <body>
     <div id="splash-screen">
         <img src="images/loadingscreen.png" alt="Splash" class="splash-full-img">
     </div>
-
 
 <div class="app-shell">
 
@@ -507,6 +618,11 @@
                     <div id="view-profile-tags" class="view-tags-group"></div>
                 </div>
 
+                <!-- KNAPP FÖR JOBBSÖKANDES TILLGÄNGLIGHET -->
+                <button id="btn-candidate-availability" class="btn btn-outline" style="margin-top: 12px; color: var(--primary); border-color: var(--primary); display: none;" onclick="openOwnAvailabilityModal()">
+                    <i class="fa-solid fa-calendar-days"></i> Min Tillgänglighet
+                </button>
+
                 <div id="restaurant-shift-publisher" class="profile-card" style="display: none; margin-top: 16px; border-color: var(--primary);">
                     <h3 style="margin-top: 0; color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-bullhorn"></i> Publicera Skiftannons
@@ -611,6 +727,44 @@
         </div>
     </div>
 
+    <!-- TILLGÄNGLIGHETSMODAL (POPUP KALENDER) -->
+    <div id="availabilityModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 440px;">
+            <button class="modal-close-btn" onclick="closeAvailabilityModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <h3 id="availModalTitle" style="margin: 0; color: #09243e; font-size: 1.2rem;">
+                    <i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Tillgänglighet
+                </h3>
+                <p id="availModalSub" style="font-size: 0.8rem; color: #94A3B8; margin-top: 4px;">
+                    Klicka på datum för att markera dagar då du är otillgänglig.
+                </p>
+            </div>
+
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button type="button" class="calendar-nav-btn" onclick="changeCalendarMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="calendarMonthLabel" class="calendar-month-title">Oktober 2026</span>
+                    <button type="button" class="calendar-nav-btn" onclick="changeCalendarMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-weekdays">
+                    <div>Mån</div><div>Tis</div><div>Ons</div><div>Tor</div><div>Fre</div><div>Lör</div><div>Sön</div>
+                </div>
+                <div id="calendarDaysGrid" class="calendar-days-grid"></div>
+            </div>
+
+            <div class="calendar-legend">
+                <div class="legend-item"><span class="legend-color available"></span> Tillgänglig</div>
+                <div class="legend-item"><span class="legend-color unavailable"></span> Otillgänglig</div>
+            </div>
+
+            <div id="availSaveContainer" style="margin-top: 18px;">
+                <button id="btnSaveAvailability" class="btn btn-primary" onclick="saveCandidateAvailability()">
+                    <i class="fa-solid fa-floppy-disk"></i> Spara Tillgänglighet
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- BEKRÄFTELSEMODAL -->
     <div id="confirmModal" class="modal-backdrop">
         <div class="modal-content confirm-box">
@@ -696,6 +850,12 @@ let pendingDeleteId = null;
 let activeChatUnsubscribe = null;
 let activeChatId = null;
 let activeChatPartner = null;
+
+// Kalendervariabler
+let calendarCurrentYear = new Date().getFullYear();
+let calendarCurrentMonth = new Date().getMonth();
+let calendarUnavailableDates = [];
+let isCalendarEditable = false;
 
 const CANDIDATE_TAGS = ['Kock', 'Servitris / Servitör', 'Bartender', 'Diskare', 'Hovmästare', 'Extra vid behov'];
 const RESTAURANT_TAGS = ['Söker Kock', 'Söker Servering', 'Söker Disk', 'Söker Hovmästare', 'Söker "Extra vid behov"'];
@@ -928,6 +1088,7 @@ window.handleFirebaseRegister = async (e) => {
             role: currentRole,
             approved: !isRestaurant,
             favorites: [],
+            unavailableDates: [],
             createdAt: new Date().toISOString()
         };
 
@@ -1211,6 +1372,7 @@ function renderProfileView() {
 
     const shiftPublisher = document.getElementById('restaurant-shift-publisher');
     const myShiftsSec = document.getElementById('my-shifts-container');
+    const availBtn = document.getElementById('btn-candidate-availability');
 
     if (isCandidate) {
         contactEl.style.display = 'none';
@@ -1236,10 +1398,12 @@ function renderProfileView() {
 
         shiftPublisher.style.display = 'none';
         myShiftsSec.style.display = 'none';
+        if (availBtn) availBtn.style.display = 'flex';
     } else {
         expEl.style.display = 'none';
         pastJobsSec.style.display = 'none';
         cvSec.style.display = 'none';
+        if (availBtn) availBtn.style.display = 'none';
 
         if (currentUserData.contactPerson) {
             contactEl.style.display = 'flex';
@@ -1266,6 +1430,161 @@ function renderProfileView() {
         tagsContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Inga roller angivna.</span>';
     }
 }
+
+// LOGIK FÖR TILLGÄNGLIGHETSKALENDERN
+window.openOwnAvailabilityModal = () => {
+    if (!currentUserData || currentUserData.role !== 'candidate') return;
+    isCalendarEditable = true;
+    calendarUnavailableDates = [...(currentUserData.unavailableDates || [])];
+    
+    document.getElementById('availModalTitle').innerHTML = '<i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Min Tillgänglighet';
+    document.getElementById('availModalSub').innerText = 'Klicka på datum för att markera/avmarkera dagar då du är otillgänglig.';
+    document.getElementById('availSaveContainer').style.display = 'block';
+
+    const now = new Date();
+    calendarCurrentYear = now.getFullYear();
+    calendarCurrentMonth = now.getMonth();
+
+    renderCalendarUI();
+    document.getElementById('availabilityModal').classList.add('active');
+};
+
+window.openCandidateAvailabilityModal = async (candidateId) => {
+    isCalendarEditable = false;
+    document.getElementById('availSaveContainer').style.display = 'none';
+
+    let candidate = allUsers.find(u => u.id === candidateId);
+    if (!candidate && candidateId === currentUserData?.id) {
+        candidate = currentUserData;
+    } else if (!candidate) {
+        try {
+            const docSnap = await getDoc(doc(db, "users", candidateId));
+            if (docSnap.exists()) {
+                candidate = { id: docSnap.id, ...docSnap.data() };
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    if (!candidate) {
+        showToast("Kunde inte hämta kandidatens tillgänglighet.", "error");
+        return;
+    }
+
+    calendarUnavailableDates = [...(candidate.unavailableDates || [])];
+
+    document.getElementById('availModalTitle').innerHTML = `<i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Tillgänglighet - ${escapeHtml(candidate.name)}`;
+    document.getElementById('availModalSub').innerText = 'Rödmarkerade datum anger när kandidaten är otillgänglig för arbete.';
+
+    const now = new Date();
+    calendarCurrentYear = now.getFullYear();
+    calendarCurrentMonth = now.getMonth();
+
+    renderCalendarUI();
+    document.getElementById('availabilityModal').classList.add('active');
+};
+
+window.closeAvailabilityModal = () => {
+    document.getElementById('availabilityModal').classList.remove('active');
+};
+
+window.changeCalendarMonth = (offset) => {
+    calendarCurrentMonth += offset;
+    if (calendarCurrentMonth < 0) {
+        calendarCurrentMonth = 11;
+        calendarCurrentYear--;
+    } else if (calendarCurrentMonth > 11) {
+        calendarCurrentMonth = 0;
+        calendarCurrentYear++;
+    }
+    renderCalendarUI();
+};
+
+function renderCalendarUI() {
+    const grid = document.getElementById('calendarDaysGrid');
+    const monthLabel = document.getElementById('calendarMonthLabel');
+    grid.innerHTML = '';
+
+    const monthNames = [
+        'Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni',
+        'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'
+    ];
+
+    monthLabel.innerText = `${monthNames[calendarCurrentMonth]} ${calendarCurrentYear}`;
+
+    const firstDayOfMonth = new Date(calendarCurrentYear, calendarCurrentMonth, 1);
+    const daysInMonth = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0).getDate();
+
+    let startingDay = firstDayOfMonth.getDay() - 1;
+    if (startingDay < 0) startingDay = 6;
+
+    for (let i = 0; i < startingDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        grid.appendChild(emptyCell);
+    }
+
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const monthStr = String(calendarCurrentMonth + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const fullDateStr = `${calendarCurrentYear}-${monthStr}-${dayStr}`;
+
+        const dayCell = document.createElement('div');
+        const isUnavailable = calendarUnavailableDates.includes(fullDateStr);
+        const isToday = fullDateStr === todayStr;
+
+        dayCell.className = `calendar-day ${isUnavailable ? 'unavailable' : ''} ${isToday ? 'today' : ''} ${!isCalendarEditable ? 'read-only' : ''}`;
+        dayCell.innerText = day;
+
+        if (isCalendarEditable) {
+            dayCell.onclick = () => toggleCalendarDate(fullDateStr);
+        }
+
+        grid.appendChild(dayCell);
+    }
+}
+
+function toggleCalendarDate(dateStr) {
+    if (!isCalendarEditable) return;
+
+    const idx = calendarUnavailableDates.indexOf(dateStr);
+    if (idx > -1) {
+        calendarUnavailableDates.splice(idx, 1);
+    } else {
+        calendarUnavailableDates.push(dateStr);
+    }
+    renderCalendarUI();
+}
+
+window.saveCandidateAvailability = async () => {
+    if (!auth.currentUser || !isCalendarEditable) return;
+
+    const saveBtn = document.getElementById('btnSaveAvailability');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sparar...';
+
+    try {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+            unavailableDates: calendarUnavailableDates
+        });
+
+        if (currentUserData) {
+            currentUserData.unavailableDates = [...calendarUnavailableDates];
+        }
+
+        showToast("Tillgänglighet sparad!", "success");
+        closeAvailabilityModal();
+    } catch (error) {
+        console.error("Fel vid sparande av tillgänglighet:", error);
+        showToast("Kunde inte spara tillgänglighet.", "error");
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Spara Tillgänglighet';
+    }
+};
 
 window.handlePostShiftAd = async (e) => {
     e.preventDefault();
@@ -1439,6 +1758,9 @@ window.showShiftApplicants = async (shiftId) => {
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
+                        <button onclick="event.stopPropagation(); openCandidateAvailabilityModal('${candidate.id}')" style="background:none; border:none; color:var(--primary); font-size:0.95rem; cursor:pointer; padding:4px;" title="Se tillgänglighet">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </button>
                         <button onclick="event.stopPropagation(); openChatModal('${candidate.id}', '${escapeJs(candidate.name)}', '${escapeJs(candidate.avatarUrl || '')}')" style="background:none; border:none; color:#38BDF8; font-size:1rem; cursor:pointer; padding:4px;" title="Chatta">
                             <i class="fa-solid fa-comment-dots"></i>
                         </button>
@@ -1778,9 +2100,14 @@ function renderRestaurantSwipeFeed() {
                         ${(item.tags || []).map(t => `<span class="tag-display">${t}</span>`).join('') || '<span style="font-size:0.75rem; color:var(--text-muted);">Inga</span>'}
                     </div>
 
-                    <button class="btn btn-outline" style="margin-top:12px; border-color:var(--primary); color:var(--primary-hover); font-size:0.85rem;" onclick="openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
-                        <i class="fa-solid fa-comments"></i> Skicka meddelande
-                    </button>
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button class="btn btn-outline" style="flex:1; border-color:var(--primary); color:var(--primary); font-size:0.82rem;" onclick="openCandidateAvailabilityModal('${item.id}')">
+                            <i class="fa-solid fa-calendar-days"></i> Tillgänglighet
+                        </button>
+                        <button class="btn btn-outline" style="flex:1; border-color:var(--primary); color:var(--primary-hover); font-size:0.82rem;" onclick="openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
+                            <i class="fa-solid fa-comments"></i> Meddelande
+                        </button>
+                    </div>
                 </div>
 
                 <div class="swipe-actions">
@@ -1947,7 +2274,13 @@ function renderSavedList() {
                 ${item.experience ? `<p class="location-tag"><i class="fa-solid fa-briefcase"></i> Erfarenhet: ${item.experience}</p>` : ''}
                 ${item.contactPerson ? `<p class="location-tag"><i class="fa-solid fa-id-badge"></i> Kontakt: ${item.contactPerson}</p>` : ''}
                 
-                <div style="display:flex; gap:10px; margin-top:12px;">
+                ${item.role === 'candidate' ? `
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:8px 12px; margin-top:10px; color:var(--primary); border-color:var(--primary); width:100%;" onclick="openCandidateAvailabilityModal('${item.id}')">
+                        <i class="fa-solid fa-calendar-days"></i> Se Tillgänglighet
+                    </button>
+                ` : ''}
+
+                <div style="display:flex; gap:10px; margin-top:10px;">
                     <button class="btn btn-primary" style="font-size:0.8rem; padding:8px 12px; flex:1;" onclick="event.stopPropagation(); openChatModal('${item.id}', '${escapeJs(item.name)}', '${escapeJs(item.avatarUrl || '')}')">
                         <i class="fa-solid fa-comments"></i> Chatt
                     </button>
@@ -1960,7 +2293,6 @@ function renderSavedList() {
         container.appendChild(card);
     });
 }
-
 
 window.handleChatSearch = (query) => {
     const resultsContainer = document.getElementById('chatSearchResults');
@@ -2254,6 +2586,10 @@ window.openProfileModal = (userId) => {
                     </span>
                 `}
             </div>
+
+            <button class="btn btn-outline" style="margin-top: 16px; color: var(--primary); border-color: var(--primary); width: 100%;" onclick="openCandidateAvailabilityModal('${user.id}')">
+                <i class="fa-solid fa-calendar-days"></i> Se Tillgänglighet
+            </button>
         ` : ''}
 
         <p style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-top: 16px; margin-bottom: 6px;">ROLLER & KOMPETENSER</p>
