@@ -15,7 +15,16 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        (function() {
+            var isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            var isDesktopScreen = window.innerWidth >= 880;
 
+            if (isDesktopScreen && !isMobileUA) {
+                window.location.href = "info.html";
+            }
+        })();
+    </script>
     <style>
         .chat-bubble {
             max-width: 78%;
@@ -182,6 +191,131 @@
         }
         .legend-color.unavailable {
             background: #EF4444;
+        }
+
+        .calendar-day.restaurant-clickable {
+            cursor: pointer !important;
+        }
+        .calendar-day.restaurant-clickable:hover {
+            border-color: #38BDF8 !important;
+            background: rgba(56, 189, 248, 0.2) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+        }
+        .calendar-day.restaurant-clickable.unavailable:hover {
+            border-color: #F87171 !important;
+            background: rgba(239, 68, 68, 0.4) !important;
+        }
+
+        /* PASS & FÖRFRÅGNINGAR STILAR */
+        .pass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pass-card.offer-card {
+            border-left: 4px solid var(--primary);
+        }
+        .pass-card.confirmed-card {
+            border-left: 4px solid #10B981;
+        }
+        .pass-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .pass-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pass-badge.pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .pass-badge.confirmed {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        .pass-badge.declined {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        .pass-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0;
+            background: var(--bg-app);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .pass-meta-item {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pass-meta-item strong {
+            color: var(--text-main);
+        }
+        .pass-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-accept {
+            background-color: #10B981;
+            color: #FFFFFF;
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+        .btn-accept:hover {
+            background-color: #059669;
+        }
+        .btn-decline {
+            background-color: transparent;
+            color: #EF4444;
+            border: 1px solid #EF4444;
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-decline:hover {
+            background-color: #FEE2E2;
         }
     </style>
 </head>
@@ -570,6 +704,30 @@
                 <div id="savedListContent">Laddar sparade...</div>
             </div>
 
+            <!-- PASS-FLIK FÖR JOBBSÖKANDE -->
+            <div id="tab-passes" class="card-container" style="display: none;">
+                <h3 style="margin-top: 0; color: var(--secondary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i> Mina Pass & Förfrågningar
+                </h3>
+
+                <div class="feed-view-toggle" style="margin-bottom: 14px;">
+                    <button class="view-tab-btn active" id="btn-passes-upcoming" onclick="setPassesSubTab('upcoming')">
+                        <i class="fa-solid fa-calendar-days"></i> Kommande pass (<span id="count-upcoming-passes">0</span>)
+                    </button>
+                    <button class="view-tab-btn" id="btn-passes-offers" onclick="setPassesSubTab('offers')">
+                        <i class="fa-solid fa-envelope-open-text"></i> Förfrågningar (<span id="count-pending-offers">0</span>)
+                    </button>
+                </div>
+
+                <div id="passesUpcomingSection">
+                    <div id="upcomingPassesList">Laddar pass...</div>
+                </div>
+
+                <div id="passesOffersSection" style="display: none;">
+                    <div id="shiftOffersList">Laddar förfrågningar...</div>
+                </div>
+            </div>
+
             <!-- CHATT-FLIK MED SÖKFÄLT -->
             <div id="tab-chat" class="card-container" style="display: none;">
                 <h3 style="margin-top: 0; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-comments" style="color:var(--primary);"></i> Meddelanden</h3>
@@ -687,6 +845,7 @@
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchTab(this, 'tab-feed')"><i class="fa-solid fa-compass"></i>Utforska</div>
             <div class="nav-item" onclick="switchTab(this, 'tab-saved')"><i class="fa-solid fa-bookmark"></i>Sparade</div>
+            <div id="nav-item-passes" class="nav-item" onclick="switchTab(this, 'tab-passes')"><i class="fa-solid fa-calendar-check"></i>Pass</div>
             <div class="nav-item" onclick="switchTab(this, 'tab-chat')"><i class="fa-solid fa-comments"></i>Chatt</div>
             <div class="nav-item" onclick="switchTab(this, 'tab-profile')"><i class="fa-solid fa-user"></i>Min Profil</div>
         </nav>
@@ -762,6 +921,84 @@
                     <i class="fa-solid fa-floppy-disk"></i> Spara Tillgänglighet
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL FÖR SKIFTFÖRFRÅGAN (RESTAURANG TILL KANDIDAT) -->
+    <div id="shiftOfferModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 440px;">
+            <button class="modal-close-btn" onclick="closeShiftOfferModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="text-align: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; color: var(--secondary); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Skicka Skiftförfrågan
+                </h3>
+                <p id="shiftOfferModalSub" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                    Fråga om kandidaten kan arbeta detta pass.
+                </p>
+            </div>
+
+            <form onsubmit="handleSendShiftOffer(event)">
+                <input type="hidden" id="offer-candidate-id">
+                <input type="hidden" id="offer-candidate-name">
+
+                <div class="form-group">
+                    <label class="form-label">Kandidat</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="offer-candidate-display" class="form-input" readonly style="background: var(--bg-app); cursor: not-allowed; font-weight: 600;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Datum</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-calendar"></i>
+                        <input type="date" id="offer-date" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tid (Arbetstider)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-clock"></i>
+                        <input type="text" id="offer-hours" class="form-input" placeholder="T.ex. 12:00 - 19:00" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Erbjuden Timlön (kr/h)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-coins"></i>
+                        <input type="number" id="offer-wage" class="form-input" placeholder="T.ex. 175" min="50" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Roll</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user-tag"></i>
+                        <select id="offer-role" class="form-select" required>
+                            <option value="">Välj roll...</option>
+                            <option value="Kock">Kock</option>
+                            <option value="Servitris / Servitör">Servitris / Servitör</option>
+                            <option value="Bartender">Bartender</option>
+                            <option value="Diskare">Diskare</option>
+                            <option value="Hovmästare">Hovmästare</option>
+                            <option value="Extra vid behov">Extra vid behov</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Valfritt meddelande till kandidaten</label>
+                    <textarea id="offer-note" class="form-textarea" placeholder="T.ex. Vi söker förstärkning under kvällen."></textarea>
+                </div>
+
+                <button type="submit" id="btn-submit-offer" class="btn btn-primary" style="margin-top: 10px;">
+                    <i class="fa-solid fa-paper-plane"></i> Skicka Förfrågan
+                </button>
+            </form>
         </div>
     </div>
 
@@ -850,6 +1087,12 @@ let pendingDeleteId = null;
 let activeChatUnsubscribe = null;
 let activeChatId = null;
 let activeChatPartner = null;
+
+// Pass- och Förfrågningsvariabler
+let viewingCandidate = null;
+let candidatePassesList = [];
+let activePassesUnsubscribe = null;
+let activePassesSubTab = 'upcoming';
 
 // Kalendervariabler
 let calendarCurrentYear = new Date().getFullYear();
@@ -1417,6 +1660,14 @@ function renderProfileView() {
         loadMyShiftAds();
     }
 
+    const passesNavItem = document.getElementById('nav-item-passes');
+    if (passesNavItem) {
+        passesNavItem.style.display = isCandidate ? 'flex' : 'none';
+    }
+    if (isCandidate) {
+        loadCandidatePasses();
+    }
+
     const tagsContainer = document.getElementById('view-profile-tags');
     tagsContainer.innerHTML = '';
     if (currentUserData.tags && currentUserData.tags.length > 0) {
@@ -1435,6 +1686,7 @@ function renderProfileView() {
 window.openOwnAvailabilityModal = () => {
     if (!currentUserData || currentUserData.role !== 'candidate') return;
     isCalendarEditable = true;
+    viewingCandidate = null;
     calendarUnavailableDates = [...(currentUserData.unavailableDates || [])];
     
     document.getElementById('availModalTitle').innerHTML = '<i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Min Tillgänglighet';
@@ -1470,10 +1722,21 @@ window.openCandidateAvailabilityModal = async (candidateId) => {
         return;
     }
 
+    viewingCandidate = {
+        id: candidate.id,
+        name: candidate.name || 'Kandidat',
+        avatarUrl: candidate.avatarUrl || ''
+    };
+
     calendarUnavailableDates = [...(candidate.unavailableDates || [])];
 
     document.getElementById('availModalTitle').innerHTML = `<i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Tillgänglighet - ${escapeHtml(candidate.name)}`;
-    document.getElementById('availModalSub').innerText = 'Rödmarkerade datum anger när kandidaten är otillgänglig för arbete.';
+    
+    if (currentUserData?.role === 'restaurant') {
+        document.getElementById('availModalSub').innerHTML = 'Klicka på ett datum i kalendern för att skicka en skiftförfrågan till ' + escapeHtml(candidate.name) + '.';
+    } else {
+        document.getElementById('availModalSub').innerText = 'Rödmarkerade datum anger när kandidaten är otillgänglig för arbete.';
+    }
 
     const now = new Date();
     calendarCurrentYear = now.getFullYear();
@@ -1525,6 +1788,7 @@ function renderCalendarUI() {
 
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+    const isRestaurantViewer = !isCalendarEditable && currentUserData?.role === 'restaurant' && viewingCandidate;
 
     for (let day = 1; day <= daysInMonth; day++) {
         const monthStr = String(calendarCurrentMonth + 1).padStart(2, '0');
@@ -1535,11 +1799,25 @@ function renderCalendarUI() {
         const isUnavailable = calendarUnavailableDates.includes(fullDateStr);
         const isToday = fullDateStr === todayStr;
 
-        dayCell.className = `calendar-day ${isUnavailable ? 'unavailable' : ''} ${isToday ? 'today' : ''} ${!isCalendarEditable ? 'read-only' : ''}`;
+        let extraClass = '';
+        if (isUnavailable) extraClass += ' unavailable';
+        if (isToday) extraClass += ' today';
+        if (isRestaurantViewer) extraClass += ' restaurant-clickable';
+        else if (!isCalendarEditable) extraClass += ' read-only';
+
+        dayCell.className = `calendar-day${extraClass}`;
         dayCell.innerText = day;
+
+        if (isRestaurantViewer) {
+            dayCell.title = isUnavailable 
+                ? 'Kandidaten är markerad som otillgänglig, men du kan ändå skicka förfrågan' 
+                : 'Klicka för att fråga om kandidaten kan jobba detta datum';
+        }
 
         if (isCalendarEditable) {
             dayCell.onclick = () => toggleCalendarDate(fullDateStr);
+        } else if (isRestaurantViewer) {
+            dayCell.onclick = () => openShiftOfferModal(viewingCandidate.id, viewingCandidate.name, fullDateStr, isUnavailable);
         }
 
         grid.appendChild(dayCell);
@@ -1583,6 +1861,306 @@ window.saveCandidateAvailability = async () => {
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Spara Tillgänglighet';
+    }
+};
+
+// RESTAURANG SKICKAR SKIFTFÖRFRÅGAN TILL KANDIDAT
+window.openShiftOfferModal = (candidateId, candidateName, dateStr, isUnavailable = false) => {
+    document.getElementById('offer-candidate-id').value = candidateId;
+    document.getElementById('offer-candidate-name').value = candidateName;
+    document.getElementById('offer-candidate-display').value = candidateName;
+    document.getElementById('offer-date').value = dateStr || '';
+    document.getElementById('offer-hours').value = '12:00 - 19:00';
+    document.getElementById('offer-wage').value = '';
+    document.getElementById('offer-role').value = '';
+    document.getElementById('offer-note').value = '';
+
+    const subEl = document.getElementById('shiftOfferModalSub');
+    if (isUnavailable) {
+        subEl.innerHTML = `<span style="color: #EF4444; font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> Obs: Kandidaten har angett sig otillgänglig detta datum (${dateStr}).</span><br>Du kan fortfarande skicka förfrågan.`;
+    } else {
+        subEl.innerText = `Fråga om ${candidateName} kan arbeta detta pass (${dateStr}).`;
+    }
+
+    document.getElementById('shiftOfferModal').classList.add('active');
+};
+
+window.closeShiftOfferModal = () => {
+    document.getElementById('shiftOfferModal').classList.remove('active');
+};
+
+window.handleSendShiftOffer = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser || currentUserData?.role !== 'restaurant') {
+        showToast("Endast restauranger kan skicka skiftförfrågningar.", "error");
+        return;
+    }
+
+    const candidateId = document.getElementById('offer-candidate-id').value;
+    const candidateName = document.getElementById('offer-candidate-name').value;
+    const date = document.getElementById('offer-date').value;
+    const hours = document.getElementById('offer-hours').value.trim();
+    const wage = document.getElementById('offer-wage').value;
+    const role = document.getElementById('offer-role').value;
+    const note = document.getElementById('offer-note').value.trim();
+
+    const submitBtn = document.getElementById('btn-submit-offer');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Skickar...';
+
+    try {
+        await addDoc(collection(db, "shift_requests"), {
+            restaurantId: auth.currentUser.uid,
+            restaurantName: currentUserData.name || 'Restaurang',
+            restaurantLocation: currentUserData.location || '',
+            restaurantPhone: currentUserData.phone || '',
+            restaurantAvatar: currentUserData.avatarUrl || '',
+            candidateId: candidateId,
+            candidateName: candidateName,
+            date: date,
+            hours: hours,
+            hourlyWage: Number(wage),
+            role: role,
+            note: note,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        });
+
+        showToast(`Skiftförfrågan har skickats till ${candidateName}!`, "success");
+        closeShiftOfferModal();
+        closeAvailabilityModal();
+    } catch (err) {
+        console.error("Kunde inte skicka skiftförfrågan:", err);
+        showToast("Kunde inte skicka förfrågan: " + err.message, "error");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Skicka Förfrågan';
+    }
+};
+
+// PASS & FÖRFRÅGNINGAR FÖR JOBBSÖKANDE
+window.setPassesSubTab = (subTab) => {
+    activePassesSubTab = subTab;
+    document.getElementById('btn-passes-upcoming').classList.toggle('active', subTab === 'upcoming');
+    document.getElementById('btn-passes-offers').classList.toggle('active', subTab === 'offers');
+    document.getElementById('passesUpcomingSection').style.display = subTab === 'upcoming' ? 'block' : 'none';
+    document.getElementById('passesOffersSection').style.display = subTab === 'offers' ? 'block' : 'none';
+};
+
+function loadCandidatePasses() {
+    if (!auth.currentUser || currentUserData?.role !== 'candidate') return;
+
+    const upcomingContainer = document.getElementById('upcomingPassesList');
+    const offersContainer = document.getElementById('shiftOffersList');
+    const countUpcomingBadge = document.getElementById('count-upcoming-passes');
+    const countOffersBadge = document.getElementById('count-pending-offers');
+
+    if (!upcomingContainer || !offersContainer) return;
+
+    if (activePassesUnsubscribe) {
+        activePassesUnsubscribe();
+    }
+
+    const q = query(
+        collection(db, "shift_requests"),
+        where("candidateId", "==", auth.currentUser.uid)
+    );
+
+    activePassesUnsubscribe = onSnapshot(q, (snapshot) => {
+        candidatePassesList = [];
+        snapshot.forEach((docSnap) => {
+            candidatePassesList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        const pendingOffers = candidatePassesList.filter(p => p.status === 'pending');
+        const acceptedPasses = candidatePassesList.filter(p => p.status === 'accepted');
+
+        // Sortera kommande pass efter det passet som kommer snarast!
+        acceptedPasses.sort((a, b) => {
+            const dateCompare = (a.date || '').localeCompare(b.date || '');
+            if (dateCompare !== 0) return dateCompare;
+            return (a.hours || '').localeCompare(b.hours || '');
+        });
+
+        // Sortera förfrågningar med nyast först
+        pendingOffers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+        if (countUpcomingBadge) countUpcomingBadge.innerText = acceptedPasses.length;
+        if (countOffersBadge) countOffersBadge.innerText = pendingOffers.length;
+
+        // Rendera Förfrågningar/Erbjudanden
+        if (pendingOffers.length === 0) {
+            offersContainer.innerHTML = `
+                <div class="empty-feed" style="padding: 24px 10px;">
+                    <i class="fa-solid fa-inbox" style="font-size: 2.2rem; color: var(--text-light); margin-bottom: 8px;"></i>
+                    <h4 style="margin: 0; color: var(--secondary);">Inga nya förfrågningar</h4>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">När en restaurang vill boka dig för ett pass dyker erbjudandet upp här.</p>
+                </div>`;
+        } else {
+            offersContainer.innerHTML = '';
+            pendingOffers.forEach(offer => {
+                const card = document.createElement('div');
+                card.className = 'pass-card offer-card';
+                card.innerHTML = `
+                    <div class="pass-card-header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${offer.restaurantAvatar 
+                                ? `<img src="${offer.restaurantAvatar}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">`
+                                : `<div class="avatar-placeholder" style="width:38px; height:38px; font-size:0.9rem;"><i class="fa-solid fa-store"></i></div>`
+                            }
+                            <div>
+                                <h4 style="margin:0; font-size:1rem; color:var(--secondary);">${escapeHtml(offer.restaurantName || 'Restaurang')}</h4>
+                                <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(offer.restaurantLocation || 'Plats ej angiven')}</span>
+                            </div>
+                        </div>
+                        <span class="pass-badge pending"><i class="fa-solid fa-clock"></i> Ny förfrågan</span>
+                    </div>
+
+                    <div style="font-weight: 700; color: var(--primary-hover); font-size: 0.95rem; margin-top: 6px;">
+                        <i class="fa-solid fa-user-tag"></i> Roll: ${escapeHtml(offer.role)}
+                    </div>
+
+                    <div class="pass-meta-grid">
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-calendar-day" style="color:var(--primary);"></i>
+                            <span>Datum: <strong>${escapeHtml(offer.date)}</strong></span>
+                        </div>
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-clock" style="color:var(--primary);"></i>
+                            <span>Tid: <strong>${escapeHtml(offer.hours)}</strong></span>
+                        </div>
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-coins" style="color:#10B981;"></i>
+                            <span>Lön: <strong style="color:#059669;">${escapeHtml(String(offer.hourlyWage))} kr/h</strong></span>
+                        </div>
+                        ${offer.restaurantPhone ? `
+                            <div class="pass-meta-item">
+                                <i class="fa-solid fa-phone" style="color:var(--text-muted);"></i>
+                                <span>${escapeHtml(offer.restaurantPhone)}</span>
+                            </div>
+                        ` : '<div class="pass-meta-item"></div>'}
+                    </div>
+
+                    ${offer.note ? `
+                        <div style="font-size:0.82rem; color:var(--text-muted); background:rgba(245, 158, 11, 0.08); padding:8px 10px; border-radius:8px; margin: 8px 0; border: 1px dashed rgba(245, 158, 11, 0.3);">
+                            <strong style="color:var(--secondary);">Meddelande:</strong> ${escapeHtml(offer.note)}
+                        </div>
+                    ` : ''}
+
+                    <div class="pass-actions">
+                        <button class="btn-accept" onclick="acceptShiftOffer('${offer.id}')">
+                            <i class="fa-solid fa-check"></i> Tacka ja
+                        </button>
+                        <button class="btn-decline" onclick="declineShiftOffer('${offer.id}')">
+                            <i class="fa-solid fa-xmark"></i> Tacka nej
+                        </button>
+                    </div>
+                `;
+                offersContainer.appendChild(card);
+            });
+        }
+
+        // Rendera Kommande Pass
+        if (acceptedPasses.length === 0) {
+            upcomingContainer.innerHTML = `
+                <div class="empty-feed" style="padding: 24px 10px;">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; color: var(--text-light); margin-bottom: 8px;"></i>
+                    <h4 style="margin: 0; color: var(--secondary);">Inga inbokade pass</h4>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">När du tackar ja till ett erbjudande läggs passet in här och sorteras kronologiskt!</p>
+                </div>`;
+        } else {
+            upcomingContainer.innerHTML = '';
+            acceptedPasses.forEach(pass => {
+                const card = document.createElement('div');
+                card.className = 'pass-card confirmed-card';
+
+                card.innerHTML = `
+                    <div class="pass-card-header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${pass.restaurantAvatar 
+                                ? `<img src="${pass.restaurantAvatar}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">`
+                                : `<div class="avatar-placeholder" style="width:38px; height:38px; font-size:0.9rem;"><i class="fa-solid fa-store"></i></div>`
+                            }
+                            <div>
+                                <h4 style="margin:0; font-size:1rem; color:var(--secondary);">${escapeHtml(pass.restaurantName || 'Restaurang')}</h4>
+                                <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(pass.restaurantLocation || 'Plats ej angiven')}</span>
+                            </div>
+                        </div>
+                        <span class="pass-badge confirmed"><i class="fa-solid fa-circle-check"></i> Bekräftat pass</span>
+                    </div>
+
+                    <div style="font-weight: 800; color: var(--secondary); font-size: 1.05rem; margin-top: 4px;">
+                        <i class="fa-solid fa-user-tag" style="color:var(--primary);"></i> ${escapeHtml(pass.role)}
+                    </div>
+
+                    <div class="pass-meta-grid">
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-calendar-day" style="color:#0284C7;"></i>
+                            <span>Datum: <strong style="color:#0284C7;">${escapeHtml(pass.date)}</strong></span>
+                        </div>
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-clock" style="color:#0284C7;"></i>
+                            <span>Tid: <strong>${escapeHtml(pass.hours)}</strong></span>
+                        </div>
+                        <div class="pass-meta-item">
+                            <i class="fa-solid fa-coins" style="color:#10B981;"></i>
+                            <span>Timlön: <strong style="color:#059669;">${escapeHtml(String(pass.hourlyWage))} kr/h</strong></span>
+                        </div>
+                        ${pass.restaurantPhone ? `
+                            <div class="pass-meta-item">
+                                <i class="fa-solid fa-phone" style="color:var(--text-muted);"></i>
+                                <span><a href="tel:${escapeHtml(pass.restaurantPhone)}" style="color:inherit; text-decoration:underline;">${escapeHtml(pass.restaurantPhone)}</a></span>
+                            </div>
+                        ` : '<div class="pass-meta-item"></div>'}
+                    </div>
+
+                    ${pass.note ? `
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin: 6px 0;"><strong>Notering:</strong> ${escapeHtml(pass.note)}</p>
+                    ` : ''}
+
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="btn btn-outline" style="flex:1; font-size:0.8rem; padding:8px 12px; border-color:var(--primary); color:var(--primary-hover);" onclick="openChatModal('${pass.restaurantId}', '${escapeJs(pass.restaurantName || 'Restaurang')}', '${escapeJs(pass.restaurantAvatar || '')}')">
+                            <i class="fa-solid fa-comments"></i> Chatta med restaurangen
+                        </button>
+                    </div>
+                `;
+                upcomingContainer.appendChild(card);
+            });
+        }
+
+    }, (err) => {
+        console.error("Fel vid laddning av pass:", err);
+        if (upcomingContainer) upcomingContainer.innerHTML = '<p style="color:var(--accent-red); font-size:0.85rem;">Kunde inte hämta pass.</p>';
+        if (offersContainer) offersContainer.innerHTML = '<p style="color:var(--accent-red); font-size:0.85rem;">Kunde inte hämta förfrågningar.</p>';
+    });
+}
+
+window.acceptShiftOffer = async (offerId) => {
+    try {
+        const offerRef = doc(db, "shift_requests", offerId);
+        await updateDoc(offerRef, {
+            status: 'accepted',
+            acceptedAt: new Date().toISOString()
+        });
+        showToast("Tackat ja! Passet har lagts till i dina schemalagda pass.", "success");
+        setPassesSubTab('upcoming');
+    } catch (err) {
+        console.error("Fel vid accept av pass:", err);
+        showToast("Kunde inte acceptera passet.", "error");
+    }
+};
+
+window.declineShiftOffer = async (offerId) => {
+    try {
+        const offerRef = doc(db, "shift_requests", offerId);
+        await updateDoc(offerRef, {
+            status: 'declined',
+            declinedAt: new Date().toISOString()
+        });
+        showToast("Förfrågan avböjd.", "info");
+    } catch (err) {
+        console.error("Fel vid avböjande av pass:", err);
+        showToast("Kunde inte avböja förfrågan.", "error");
     }
 };
 
@@ -1831,12 +2409,18 @@ async function loadFeedData() {
 
     feedContainer.innerHTML = '<p style="text-align:center; padding:20px;">Hämtar flöde...</p>';
 
+    const passesNavItem = document.getElementById('nav-item-passes');
+    if (passesNavItem) {
+        passesNavItem.style.display = currentUserData.role === 'candidate' ? 'flex' : 'none';
+    }
+
     if (currentUserData.role === 'restaurant') {
         filterContainer.style.display = 'flex';
         toggleContainer.style.display = 'none';
     } else {
         filterContainer.style.display = 'none';
         toggleContainer.style.display = 'flex';
+        loadCandidatePasses();
     }
 
     try {
@@ -2615,13 +3199,15 @@ window.closeProfileModal = () => {
 
 window.switchTab = (el, tabId) => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    el.classList.add('active');
+    if (el) el.classList.add('active');
     document.getElementById('tab-feed').style.display = tabId === 'tab-feed' ? 'flex' : 'none';
     document.getElementById('tab-saved').style.display = tabId === 'tab-saved' ? 'flex' : 'none';
+    document.getElementById('tab-passes').style.display = tabId === 'tab-passes' ? 'flex' : 'none';
     document.getElementById('tab-chat').style.display = tabId === 'tab-chat' ? 'flex' : 'none';
     document.getElementById('tab-profile').style.display = tabId === 'tab-profile' ? 'flex' : 'none';
 
     if (tabId === 'tab-saved') renderSavedList();
+    if (tabId === 'tab-passes') loadCandidatePasses();
     if (tabId === 'tab-chat') {
         const searchInput = document.getElementById('chatSearchInput');
         if (searchInput) {

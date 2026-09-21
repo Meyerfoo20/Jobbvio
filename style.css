@@ -158,8 +158,8 @@
         .app-main { flex: 1; padding: 14px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
 
         .bottom-nav { background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 16px 0; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.7rem; font-weight: 600; cursor: pointer; gap: 4px; width: 33%; }
-        .nav-item i { font-size: 1.2rem; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.68rem; font-weight: 600; cursor: pointer; gap: 4px; flex: 1; min-width: 0; text-align: center; }
+        .nav-item i { font-size: 1.15rem; }
         .nav-item.active { color: var(--primary-hover); }
 
         .card-container { flex: 1; display: flex; flex-direction: column; }
