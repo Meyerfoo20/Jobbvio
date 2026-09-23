@@ -16,14 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        (function() {
-            var isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            var isDesktopScreen = window.innerWidth >= 880;
 
-            if (isDesktopScreen && !isMobileUA) {
-                window.location.href = "info.html";
-            }
-        })();
     </script>
     <style>
         .chat-bubble {
@@ -69,8 +62,6 @@
             background: #334155;
             border-color: #0284C7;
         }
-
-        /* TILLGÄNGLIGHETSKALENDER STILER */
         .calendar-wrapper {
             background: #1E293B;
             border: 1px solid #334155;
@@ -207,40 +198,40 @@
             background: rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* PASS & FÖRFRÅGNINGAR STILAR */
         .pass-card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-bottom: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
             box-shadow: var(--shadow-sm);
             position: relative;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .pass-card.offer-card {
-            border-left: 4px solid var(--primary);
+            border-left: 2px solid var(--primary);
         }
         .pass-card.confirmed-card {
-            border-left: 4px solid #10B981;
+            border-left: 2px solid #10B981;
         }
         .pass-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 10px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
         }
         .pass-badge {
-            font-size: 0.72rem;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
+            white-space: nowrap;
         }
         .pass-badge.pending {
             background: #FEF3C7;
@@ -256,42 +247,45 @@
         }
         .pass-meta-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 10px 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px 8px;
+            margin: 6px 0;
             background: var(--bg-app);
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            border-radius: 8px;
             border: 1px solid var(--border);
         }
         .pass-meta-item {
-            font-size: 0.8rem;
+            font-size: 0.73rem;
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .pass-meta-item strong {
             color: var(--text-main);
         }
         .pass-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 8px;
         }
         .btn-accept {
             background-color: #10B981;
             color: #FFFFFF;
             flex: 1;
-            padding: 10px 14px;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             font-weight: 700;
             transition: background 0.2s;
         }
@@ -303,14 +297,14 @@
             color: #EF4444;
             border: 1px solid #EF4444;
             flex: 1;
-            padding: 10px 14px;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             font-weight: 700;
             transition: all 0.2s;
         }
@@ -712,7 +706,7 @@
 
                 <div class="feed-view-toggle" style="margin-bottom: 14px;">
                     <button class="view-tab-btn active" id="btn-passes-upcoming" onclick="setPassesSubTab('upcoming')">
-                        <i class="fa-solid fa-calendar-days"></i> Pass (<span id="count-upcoming-passes">0</span>)
+                        <i class="fa-solid fa-calendar-days"></i> Kommande pass (<span id="count-upcoming-passes">0</span>)
                     </button>
                     <button class="view-tab-btn" id="btn-passes-offers" onclick="setPassesSubTab('offers')">
                         <i class="fa-solid fa-envelope-open-text"></i> Förfrågningar (<span id="count-pending-offers">0</span>)
@@ -1975,32 +1969,27 @@ function loadCandidatePasses() {
         const now = new Date();
         const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        // Erbjudanden som fortfarande är aktuella (idag eller framåt)
         const pendingOffers = candidatePassesList.filter(p => p.status === 'pending' && (!p.date || p.date >= todayStr));
-        
-        // Kommande pass: endast idag eller framtida datum (försvinner dagen efter passet varit)
         const acceptedPasses = candidatePassesList.filter(p => p.status === 'accepted' && (!p.date || p.date >= todayStr));
 
-        // Sortera kommande pass efter det passet som kommer snarast!
         acceptedPasses.sort((a, b) => {
             const dateCompare = (a.date || '').localeCompare(b.date || '');
             if (dateCompare !== 0) return dateCompare;
             return (a.hours || '').localeCompare(b.hours || '');
         });
 
-        // Sortera förfrågningar med nyast först
         pendingOffers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
         if (countUpcomingBadge) countUpcomingBadge.innerText = acceptedPasses.length;
         if (countOffersBadge) countOffersBadge.innerText = pendingOffers.length;
 
-        // Rendera Förfrågningar/Erbjudanden
+        // Rendera Förfrågningar
         if (pendingOffers.length === 0) {
             offersContainer.innerHTML = `
-                <div class="empty-feed" style="padding: 24px 10px;">
-                    <i class="fa-solid fa-inbox" style="font-size: 2.2rem; color: var(--text-light); margin-bottom: 8px;"></i>
-                    <h4 style="margin: 0; color: var(--secondary);">Inga nya förfrågningar</h4>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">När en restaurang vill boka dig för ett pass dyker erbjudandet upp här.</p>
+                <div class="empty-feed" style="padding: 20px 10px;">
+                    <i class="fa-solid fa-inbox" style="font-size: 2rem; color: var(--text-light); margin-bottom: 6px;"></i>
+                    <h4 style="margin: 0; color: var(--secondary); font-size: 0.9rem;">Inga nya förfrågningar</h4>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">När en restaurang vill boka dig för ett pass dyker erbjudandet upp här.</p>
                 </div>`;
         } else {
             offersContainer.innerHTML = '';
@@ -2009,35 +1998,35 @@ function loadCandidatePasses() {
                 card.className = 'pass-card offer-card';
                 card.innerHTML = `
                     <div class="pass-card-header">
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
                             ${offer.restaurantAvatar 
-                                ? `<img src="${offer.restaurantAvatar}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">`
-                                : `<div class="avatar-placeholder" style="width:38px; height:38px; font-size:0.9rem;"><i class="fa-solid fa-store"></i></div>`
+                                ? `<img src="${offer.restaurantAvatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">`
+                                : `<div class="avatar-placeholder" style="width:30px; height:30px; font-size:0.75rem;"><i class="fa-solid fa-store"></i></div>`
                             }
                             <div>
-                                <h4 style="margin:0; font-size:1rem; color:var(--secondary);">${escapeHtml(offer.restaurantName || 'Restaurang')}</h4>
-                                <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(offer.restaurantLocation || 'Plats ej angiven')}</span>
+                                <h4 style="margin:0; font-size:0.88rem; color:var(--secondary); font-weight:700; line-height:1.2;">${escapeHtml(offer.restaurantName || 'Restaurang')}</h4>
+                                <span style="font-size:0.7rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(offer.restaurantLocation || 'Plats ej angiven')}</span>
                             </div>
                         </div>
                         <span class="pass-badge pending"><i class="fa-solid fa-clock"></i> Ny förfrågan</span>
                     </div>
 
-                    <div style="font-weight: 700; color: var(--primary-hover); font-size: 0.95rem; margin-top: 6px;">
-                        <i class="fa-solid fa-user-tag"></i> Roll: ${escapeHtml(offer.role)}
+                    <div style="font-weight: 700; color: var(--primary-hover); font-size: 0.82rem; margin: 4px 0;">
+                        <i class="fa-solid fa-user-tag"></i> ${escapeHtml(offer.role)}
                     </div>
 
                     <div class="pass-meta-grid">
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-calendar-day" style="color:var(--primary);"></i>
-                            <span>Datum: <strong>${escapeHtml(offer.date)}</strong></span>
+                            <span><strong>${escapeHtml(offer.date)}</strong></span>
                         </div>
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-clock" style="color:var(--primary);"></i>
-                            <span>Tid: <strong>${escapeHtml(offer.hours)}</strong></span>
+                            <span><strong>${escapeHtml(offer.hours)}</strong></span>
                         </div>
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-coins" style="color:#10B981;"></i>
-                            <span>Lön: <strong style="color:#059669;">${escapeHtml(String(offer.hourlyWage))} kr/h</strong></span>
+                            <span><strong style="color:#059669;">${escapeHtml(String(offer.hourlyWage))} kr/h</strong></span>
                         </div>
                         ${offer.restaurantPhone ? `
                             <div class="pass-meta-item">
@@ -2048,8 +2037,8 @@ function loadCandidatePasses() {
                     </div>
 
                     ${offer.note ? `
-                        <div style="font-size:0.82rem; color:var(--text-muted); background:rgba(245, 158, 11, 0.08); padding:8px 10px; border-radius:8px; margin: 8px 0; border: 1px dashed rgba(245, 158, 11, 0.3);">
-                            <strong style="color:var(--secondary);">Meddelande:</strong> ${escapeHtml(offer.note)}
+                        <div style="font-size:0.75rem; color:var(--text-muted); background:rgba(245, 158, 11, 0.08); padding:5px 8px; border-radius:6px; margin: 4px 0; border: 1px dashed rgba(245, 158, 11, 0.3);">
+                            <strong style="color:var(--secondary);">Obs:</strong> ${escapeHtml(offer.note)}
                         </div>
                     ` : ''}
 
@@ -2069,10 +2058,10 @@ function loadCandidatePasses() {
         // Rendera Kommande Pass
         if (acceptedPasses.length === 0) {
             upcomingContainer.innerHTML = `
-                <div class="empty-feed" style="padding: 24px 10px;">
-                    <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; color: var(--text-light); margin-bottom: 8px;"></i>
-                    <h4 style="margin: 0; color: var(--secondary);">Inga inbokade pass</h4>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">När du tackar ja till ett erbjudande läggs passet in här och sorteras kronologiskt!</p>
+                <div class="empty-feed" style="padding: 20px 10px;">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; color: var(--text-light); margin-bottom: 6px;"></i>
+                    <h4 style="margin: 0; color: var(--secondary); font-size: 0.9rem;">Inga inbokade pass</h4>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">När du tackar ja till ett erbjudande läggs passet in här kronologiskt.</p>
                 </div>`;
         } else {
             upcomingContainer.innerHTML = '';
@@ -2082,35 +2071,35 @@ function loadCandidatePasses() {
 
                 card.innerHTML = `
                     <div class="pass-card-header">
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
                             ${pass.restaurantAvatar 
-                                ? `<img src="${pass.restaurantAvatar}" style="width:38px; height:38px; border-radius:50%; object-fit:cover;">`
-                                : `<div class="avatar-placeholder" style="width:38px; height:38px; font-size:0.9rem;"><i class="fa-solid fa-store"></i></div>`
+                                ? `<img src="${pass.restaurantAvatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">`
+                                : `<div class="avatar-placeholder" style="width:30px; height:30px; font-size:0.75rem;"><i class="fa-solid fa-store"></i></div>`
                             }
                             <div>
-                                <h4 style="margin:0; font-size:1rem; color:var(--secondary);">${escapeHtml(pass.restaurantName || 'Restaurang')}</h4>
-                                <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(pass.restaurantLocation || 'Plats ej angiven')}</span>
+                                <h4 style="margin:0; font-size:0.88rem; color:var(--secondary); font-weight:700; line-height:1.2;">${escapeHtml(pass.restaurantName || 'Restaurang')}</h4>
+                                <span style="font-size:0.7rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(pass.restaurantLocation || 'Plats ej angiven')}</span>
                             </div>
                         </div>
-                        <span class="pass-badge confirmed"><i class="fa-solid fa-circle-check"></i> Bekräftat pass</span>
+                        <span class="pass-badge confirmed"><i class="fa-solid fa-circle-check"></i> Bekräftat</span>
                     </div>
 
-                    <div style="font-weight: 800; color: var(--secondary); font-size: 1.05rem; margin-top: 4px;">
+                    <div style="font-weight: 800; color: var(--secondary); font-size: 0.88rem; margin: 2px 0;">
                         <i class="fa-solid fa-user-tag" style="color:var(--primary);"></i> ${escapeHtml(pass.role)}
                     </div>
 
                     <div class="pass-meta-grid">
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-calendar-day" style="color:#0284C7;"></i>
-                            <span>Datum: <strong style="color:#0284C7;">${escapeHtml(pass.date)}</strong></span>
+                            <span><strong style="color:#0284C7;">${escapeHtml(pass.date)}</strong></span>
                         </div>
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-clock" style="color:#0284C7;"></i>
-                            <span>Tid: <strong>${escapeHtml(pass.hours)}</strong></span>
+                            <span><strong>${escapeHtml(pass.hours)}</strong></span>
                         </div>
                         <div class="pass-meta-item">
                             <i class="fa-solid fa-coins" style="color:#10B981;"></i>
-                            <span>Timlön: <strong style="color:#059669;">${escapeHtml(String(pass.hourlyWage))} kr/h</strong></span>
+                            <span><strong style="color:#059669;">${escapeHtml(String(pass.hourlyWage))} kr/h</strong></span>
                         </div>
                         ${pass.restaurantPhone ? `
                             <div class="pass-meta-item">
@@ -2121,11 +2110,11 @@ function loadCandidatePasses() {
                     </div>
 
                     ${pass.note ? `
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin: 6px 0;"><strong>Notering:</strong> ${escapeHtml(pass.note)}</p>
+                        <p style="font-size:0.75rem; color:var(--text-muted); margin: 4px 0;"><strong>Notering:</strong> ${escapeHtml(pass.note)}</p>
                     ` : ''}
 
-                    <div style="display:flex; gap:8px; margin-top:10px;">
-                        <button class="btn btn-outline" style="flex:1; font-size:0.8rem; padding:8px 12px; border-color:var(--primary); color:var(--primary-hover);" onclick="openChatModal('${pass.restaurantId}', '${escapeJs(pass.restaurantName || 'Restaurang')}', '${escapeJs(pass.restaurantAvatar || '')}')">
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <button class="btn btn-outline" style="flex:1; font-size:0.75rem; padding:6px 10px; border-color:var(--primary); color:var(--primary-hover);" onclick="openChatModal('${pass.restaurantId}', '${escapeJs(pass.restaurantName || 'Restaurang')}', '${escapeJs(pass.restaurantAvatar || '')}')">
                             <i class="fa-solid fa-comments"></i> Chatta med restaurangen
                         </button>
                     </div>
